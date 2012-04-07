@@ -3,5 +3,10 @@
 
     <string name="hello">Hello World, FontCreatorLocalActivity!</string>
     <string name="app_name">FontCreatorLocal</string>
+    <string name="A">A</string>
+    <string name="prev">&lt;&lt;Prev</string>
+    <string name="next">Next&gt;&gt;</string>
+    <string name="save">Save</string>
+    
 
 </resources>
