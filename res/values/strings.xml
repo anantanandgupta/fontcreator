@@ -7,6 +7,7 @@
     <string name="prev">&lt;&lt;Prev</string>
     <string name="next">Next&gt;&gt;</string>
     <string name="save">Save</string>
-    
-
+    <string name="new_font">New Font</string>
+    <string name="existing_font">Existing Font</string>
+	<string name="help">Help</string>
 </resources>
