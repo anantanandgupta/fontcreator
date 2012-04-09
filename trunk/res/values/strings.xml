@@ -18,5 +18,6 @@
     <string name="display_font">Display Font</string>
     <string name="edit_font">Edit Font</string>
     <string name="serif">Serif</string>
+    <string name="this_is_where_help_goes">This is where help goes.</string>
 
 </resources>
