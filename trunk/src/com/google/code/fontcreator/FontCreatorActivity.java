@@ -9,8 +9,7 @@ public class FontCreatorActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        //startActivity(new Intent(this, DrawActivity.class));
-        startActivity(new Intent(this, MainMenuActivity.class));
+        setContentView(R.layout.mainmenu);
+//        startActivity(new Intent(this, DrawActivity.class));\
     }
 }

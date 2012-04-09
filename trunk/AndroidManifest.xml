@@ -27,6 +27,14 @@
             android:name=".MainMenuActivity"
             android:label="Main Menu Activity"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
+            android:name=".UseActivity"
+            android:label="Use Font Activity"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
+            android:name=".DisplayActivity"
+            android:label="Display Font Activity"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
     </application>
 
 </manifest>
