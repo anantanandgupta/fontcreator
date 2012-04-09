@@ -10,4 +10,7 @@
     <string name="new_font">New Font</string>
     <string name="existing_font">Existing Font</string>
 	<string name="help">Help</string>
+	<string name="select_font">Select Font</string>
+	<string name="ok">OK</string>
+	<string name="cancel">Cancel</string>
 </resources>
