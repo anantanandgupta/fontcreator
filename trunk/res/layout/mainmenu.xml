@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/blackboardbackground"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:layout_x="20dp"
+        android:layout_y="50dp"
+        android:id="@+id/main_image"
+        android:src="@drawable/fontmakertitle" />
+
+    <Button
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="200dp"
+        android:background="@drawable/button"
+        android:text="@string/new_font"
+        android:textColor="@color/white1" />
+
+    <Button
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="260dp"
+        android:background="@drawable/button"
+        android:text="@string/existing_font"
+        android:textColor="@color/white1" />
+
+    <Button
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="320dp"
+        android:background="@drawable/button"
+        android:text="@string/help"
+        android:textColor="@color/white1" />
+
+</AbsoluteLayout>
