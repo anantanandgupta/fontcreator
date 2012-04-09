@@ -11,5 +11,6 @@ public class FontCreatorActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         //startActivity(new Intent(this, DrawActivity.class));
+        startActivity(new Intent(this, MainMenuActivity.class));
     }
 }

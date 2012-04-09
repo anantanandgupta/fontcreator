@@ -23,6 +23,10 @@
             android:name=".DrawActivity"
             android:label="Draw Activity"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
+            android:name=".MainMenuActivity"
+            android:label="Main Menu Activity"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
     </application>
 
 </manifest>
