@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/blackboardbackground"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/edit_button"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="140dp"
+        android:background="@drawable/button"
+        android:text="@string/edit_font"
+        android:textColor="@color/white1" />
+
+    <Button
+        android:id="@+id/export_button"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="200dp"
+        android:background="@drawable/button"
+        android:text="@string/export_font"
+        android:textColor="@color/white1" />
+
+    <Button
+        android:id="@+id/display_button"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="260dp"
+        android:background="@drawable/button"
+        android:text="@string/display_font"
+        android:textColor="@color/white1" />
+
+    <Button
+        android:id="@+id/use_button"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_x="20dp"
+        android:layout_y="320dp"
+        android:background="@drawable/button"
+        android:text="@string/use_font"
+        android:textColor="@color/white1" />
+
+    <TextView
+        android:id="@+id/font_to_be_edited"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="82dp"
+        android:gravity="center"
+        android:text="@string/serif"
+        android:textSize="30dp" />
+
+    <TextView
+        android:id="@+id/edit_font_textview"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="41dp"
+        android:gravity="center"
+        android:text="@string/edit_font"
+        android:textColor="@color/white1"
+        android:textSize="30dp" />
+
+</AbsoluteLayout>
