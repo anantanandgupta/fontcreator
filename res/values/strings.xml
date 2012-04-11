@@ -26,4 +26,14 @@
    	<string name="LCLetters">a b c d e f g h i j k l m n o p q r s t u v w x y z</string>
    	<string name="numbers">0 1 2 3 4 5 6 7 8 9</string>
    	<string name="symbols">. , ; ! @ # $ % ^ &amp; * ( )</string>
+    <string name="send_string">SEND</string>
+    <string name="email_to_string">E-mail To:</string>
+    <string name="email_note">E-mail Note</string>
+    
+    <string-array name="Fonts_Array">
+		<item>Sample 1</item>
+		<item>Sample 2</item>
+		<item>Sample 3</item>
+	</string-array>
+   	
 </resources>
