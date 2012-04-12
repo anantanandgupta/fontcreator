@@ -31,6 +31,14 @@
             android:name=".DisplayActivity"
             android:label="Display Font Activity"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
+            android:name=".HelpActivity"
+            android:label="Help Activity"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
+            android:name=".ManageFontActivity"
+            android:label="Manage Font Activity"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
     </application>
 
 </manifest>
