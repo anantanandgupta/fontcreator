@@ -29,7 +29,6 @@
     <string name="send_string">SEND</string>
     <string name="email_to_string">E-mail To:</string>
     <string name="email_note">E-mail Note</string>
-    
     <string-array name="Fonts_Array">
 		<item>Sample 1</item>
 		<item>Sample 2</item>

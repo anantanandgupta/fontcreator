@@ -64,7 +64,7 @@
             android:src="@drawable/backbutton" />
 
         <Button
-            android:id="@+id/currentLetterDisplay"
+            android:id="@+id/currentLetterDisplayButton"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_weight="3"
