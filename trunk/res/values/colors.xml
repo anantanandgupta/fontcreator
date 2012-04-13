@@ -16,4 +16,5 @@
    <color name="ltblue">#7bb8d2</color>
    <color name="black">#000000</color>
    <color name="bluebutton">#1f487c</color>
+   <color name="transparentbuttonselected">#AAACA899</color>
 </resources>
