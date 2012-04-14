@@ -27,6 +27,7 @@ public final class R {
         public static final int orange2=0x7f050003;
         public static final int red1=0x7f05000b;
         public static final int red2=0x7f05000c;
+        public static final int transparent=0x7f050011;
         public static final int transparentbuttonselected=0x7f050010;
         public static final int white1=0x7f050007;
         public static final int white2=0x7f050008;
