@@ -18,6 +18,15 @@ public class DrawActivity extends Activity implements OnClickListener {
 			undoButton, redoButton;
 	Button currentLetterDisplayButton, prevButton, saveButton, nextButton;
 
+	private enum DrawingTools {
+		straightLine,
+		freeDraw,
+		curvedLine,
+		eraser
+	}
+	
+	private DrawingTools currentTool;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,6 +53,8 @@ public class DrawActivity extends Activity implements OnClickListener {
 		prevButton.setOnClickListener(this);
 		saveButton.setOnClickListener(this);
 		nextButton.setOnClickListener(this);
+		currentTool = DrawingTools.straightLine;
+		updateToolHighlight();
 	}
 
 	@Override
@@ -78,14 +89,22 @@ public class DrawActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.straightLineToolButton:
+			currentTool = DrawingTools.straightLine;
+			updateToolHighlight();
 			break;
 		case R.id.freeDrawToolButton:
+			currentTool = DrawingTools.freeDraw;
+			updateToolHighlight();
 			break;
 		case R.id.curvedLineToolButton:
+			currentTool = DrawingTools.curvedLine;
+			updateToolHighlight();
 			break;
 		case R.id.clearToolButton:
 			break;
 		case R.id.eraserToolButton:
+			currentTool = DrawingTools.eraser;
+			updateToolHighlight();
 			break;
 		case R.id.undoButton:
 			break;
@@ -98,6 +117,35 @@ public class DrawActivity extends Activity implements OnClickListener {
 		case R.id.saveButton:
 			break;
 		case R.id.nextButton:
+			break;
+		}
+	}
+	
+	private void updateToolHighlight() {
+		switch (currentTool) {
+		case straightLine:
+			straightLineToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			freeDrawToolButton.setBackgroundResource(R.color.transparent);
+			curvedLineToolButton.setBackgroundResource(R.color.transparent);
+			eraserToolButton.setBackgroundResource(R.color.transparent);
+			break;
+		case freeDraw:
+			straightLineToolButton.setBackgroundResource(R.color.transparent);
+			freeDrawToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			curvedLineToolButton.setBackgroundResource(R.color.transparent);
+			eraserToolButton.setBackgroundResource(R.color.transparent);
+			break;
+		case curvedLine:
+			straightLineToolButton.setBackgroundResource(R.color.transparent);
+			freeDrawToolButton.setBackgroundResource(R.color.transparent);
+			curvedLineToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			eraserToolButton.setBackgroundResource(R.color.transparent);
+			break;
+		case eraser:
+			straightLineToolButton.setBackgroundResource(R.color.transparent);
+			freeDrawToolButton.setBackgroundResource(R.color.transparent);
+			curvedLineToolButton.setBackgroundResource(R.color.transparent);
+			eraserToolButton.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		}
 	}

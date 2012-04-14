@@ -17,4 +17,5 @@
    <color name="black">#000000</color>
    <color name="bluebutton">#1f487c</color>
    <color name="transparentbuttonselected">#AAACA899</color>
+   <color name="transparent">#00FFFFFF</color>
 </resources>
