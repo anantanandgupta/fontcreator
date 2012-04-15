@@ -122,29 +122,21 @@ public class DrawActivity extends Activity implements OnClickListener {
 	}
 	
 	private void updateToolHighlight() {
+		straightLineToolButton.setBackgroundResource(R.color.transparent);
+		freeDrawToolButton.setBackgroundResource(R.color.transparent);
+		curvedLineToolButton.setBackgroundResource(R.color.transparent);
+		eraserToolButton.setBackgroundResource(R.color.transparent);
 		switch (currentTool) {
 		case straightLine:
 			straightLineToolButton.setBackgroundResource(R.color.transparentbuttonselected);
-			freeDrawToolButton.setBackgroundResource(R.color.transparent);
-			curvedLineToolButton.setBackgroundResource(R.color.transparent);
-			eraserToolButton.setBackgroundResource(R.color.transparent);
 			break;
 		case freeDraw:
-			straightLineToolButton.setBackgroundResource(R.color.transparent);
 			freeDrawToolButton.setBackgroundResource(R.color.transparentbuttonselected);
-			curvedLineToolButton.setBackgroundResource(R.color.transparent);
-			eraserToolButton.setBackgroundResource(R.color.transparent);
 			break;
 		case curvedLine:
-			straightLineToolButton.setBackgroundResource(R.color.transparent);
-			freeDrawToolButton.setBackgroundResource(R.color.transparent);
 			curvedLineToolButton.setBackgroundResource(R.color.transparentbuttonselected);
-			eraserToolButton.setBackgroundResource(R.color.transparent);
 			break;
 		case eraser:
-			straightLineToolButton.setBackgroundResource(R.color.transparent);
-			freeDrawToolButton.setBackgroundResource(R.color.transparent);
-			curvedLineToolButton.setBackgroundResource(R.color.transparent);
 			eraserToolButton.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		}
