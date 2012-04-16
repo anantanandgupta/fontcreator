@@ -13,20 +13,20 @@ import android.widget.ImageButton;
 
 public class DrawActivity extends Activity implements OnClickListener {
 
-	ImageButton straightLineToolButton, freeDrawToolButton,
+	private ImageButton straightLineToolButton, freeDrawToolButton,
 			curvedLineToolButton, clearToolButton, eraserToolButton,
 			undoButton, redoButton;
-	Button currentLetterDisplayButton, prevButton, saveButton, nextButton;
+	private Button currentLetterDisplayButton, prevButton, saveButton,
+			nextButton;
 
-	private enum DrawingTools {
-		straightLine,
-		freeDraw,
-		curvedLine,
-		eraser
+	private DrawPanel drawPanel;
+
+	public enum DrawingTools {
+		straightLine, freeDraw, curvedLine, eraser
 	}
-	
+
 	private DrawingTools currentTool;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,6 +42,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 		prevButton = (Button) findViewById(R.id.prevButton);
 		saveButton = (Button) findViewById(R.id.saveButton);
 		nextButton = (Button) findViewById(R.id.nextButton);
+		drawPanel = (DrawPanel) findViewById(R.id.drawPanel);
 		straightLineToolButton.setOnClickListener(this);
 		freeDrawToolButton.setOnClickListener(this);
 		curvedLineToolButton.setOnClickListener(this);
@@ -54,6 +55,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 		saveButton.setOnClickListener(this);
 		nextButton.setOnClickListener(this);
 		currentTool = DrawingTools.straightLine;
+		drawPanel.setCurrentTool(DrawingTools.straightLine);
 		updateToolHighlight();
 	}
 
@@ -91,24 +93,34 @@ public class DrawActivity extends Activity implements OnClickListener {
 		case R.id.straightLineToolButton:
 			currentTool = DrawingTools.straightLine;
 			updateToolHighlight();
+			drawPanel.setCurrentTool(DrawingTools.straightLine);
 			break;
 		case R.id.freeDrawToolButton:
 			currentTool = DrawingTools.freeDraw;
 			updateToolHighlight();
+			drawPanel.setCurrentTool(DrawingTools.freeDraw);
+
 			break;
 		case R.id.curvedLineToolButton:
 			currentTool = DrawingTools.curvedLine;
 			updateToolHighlight();
+			drawPanel.setCurrentTool(DrawingTools.curvedLine);
+
 			break;
 		case R.id.clearToolButton:
+			drawPanel.clear();
 			break;
 		case R.id.eraserToolButton:
 			currentTool = DrawingTools.eraser;
 			updateToolHighlight();
+			drawPanel.setCurrentTool(DrawingTools.eraser);
+
 			break;
 		case R.id.undoButton:
+			drawPanel.undo();
 			break;
 		case R.id.redoButton:
+			drawPanel.redo();
 			break;
 		case R.id.currentLetterDisplayButton:
 			break;
@@ -120,7 +132,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 			break;
 		}
 	}
-	
+
 	private void updateToolHighlight() {
 		straightLineToolButton.setBackgroundResource(R.color.transparent);
 		freeDrawToolButton.setBackgroundResource(R.color.transparent);
@@ -128,16 +140,20 @@ public class DrawActivity extends Activity implements OnClickListener {
 		eraserToolButton.setBackgroundResource(R.color.transparent);
 		switch (currentTool) {
 		case straightLine:
-			straightLineToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			straightLineToolButton
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		case freeDraw:
-			freeDrawToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			freeDrawToolButton
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		case curvedLine:
-			curvedLineToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			curvedLineToolButton
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		case eraser:
-			eraserToolButton.setBackgroundResource(R.color.transparentbuttonselected);
+			eraserToolButton
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		}
 	}

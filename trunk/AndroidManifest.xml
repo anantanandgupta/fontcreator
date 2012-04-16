@@ -12,12 +12,14 @@
         <activity
             android:name=".DrawActivity"
             android:label="Draw Activity"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
             android:name=".MainMenuActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
-             <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -26,22 +28,27 @@
         <activity
             android:name=".UseActivity"
             android:label="Use Font Activity"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
             android:name=".DisplayActivity"
             android:label="Display Font Activity"
-            android:theme="@android:style/Theme.Black.NoTitleBar"/> 
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
             android:name=".SendActivity"
             android:label="Send Note Activity"
-            android:theme="@android:style/Theme.Black.NoTitleBar"/> 
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
             android:name=".HelpActivity"
             android:label="Help Activity"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
             android:name=".ManageFontActivity"
             android:label="Manage Font Activity"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
     </application>
 

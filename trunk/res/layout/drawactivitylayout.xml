@@ -81,7 +81,8 @@
             android:src="@drawable/forwardbutton" />
     </LinearLayout>
 
-    <Button
+    <com.google.code.fontcreator.DrawPanel
+        android:id="@+id/drawPanel"
         android:layout_width="match_parent"
         android:layout_height="355sp"
         android:background="@color/white1" />
