@@ -2,19 +2,52 @@ package com.google.code.fontcreator;
 
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
+import android.util.Log;
 
 public class Stroke {
-public Stroke(Path path, Paint paint) {
-		super();
+
+	private Point start, end, control;
+	
+	private Path path;
+
+	public Point getStart() {
+		return start;
+	}
+
+	public Point getEnd() {
+		return end;
+	}
+	
+	public Point getControl() {
+		return control;
+	}
+
+	public Stroke(Point start, Point control, Point end, Paint paint) {
+		Log.v("WTF",start+" " + control + " " + end);
+		this.start = new Point(start);
+		this.end = new Point(end);
+		this.control = new Point(control);
+		this.paint = paint;
+		
+		path = new Path();
+		path.moveTo(start.x, start.y);
+		path.quadTo(control.x, control.y, end.x, end.y);
+	}
+	
+	public Stroke( Path path, Paint paint) {
 		this.path = path;
 		this.paint = paint;
+		Log.v("WTF",start+" " + control + " " + end);
 	}
-public Path getPath() {
-	return path;
-}
-public Paint getPaint() {
-	return paint;
-}
-private Path path;
-private Paint paint;
+
+	public Path getPath() {
+		return path;
+	}
+
+	public Paint getPaint() {
+		return paint;
+	}
+	
+	private Paint paint;
 }
