@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.code.fontcreator.DrawActivity.DrawingTools;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,6 +44,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		redoHistory = new ArrayList<Stroke>();
 		contourRedoHistory = new ArrayList<Stroke>();
 		defaultPaint = new Paint();
+		defaultPaint.setColor(Color.BLUE);
 		defaultPaint.setStyle(Paint.Style.STROKE);
 		defaultPaint.setStrokeWidth(1.0f);
 		defaultPaint.setStrokeMiter(1.0f);
@@ -49,6 +52,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		defaultPaint.setStrokeCap(Cap.SQUARE);
 		defaultPaint.setAntiAlias(true);
 		continuousPaint = new Paint();
+		continuousPaint.setColor(Color.BLUE);
 		continuousPaint.setStyle(Paint.Style.STROKE);
 		continuousPaint.setStrokeWidth(1.0f);
 		continuousPaint.setStrokeMiter(1.0f);
@@ -56,13 +60,13 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		continuousPaint.setStrokeCap(Cap.ROUND);
 		continuousPaint.setAntiAlias(true);
 		contourPaint = new Paint();
-		contourPaint.setStyle(Paint.Style.STROKE);
+		contourPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 		contourPaint.setStrokeWidth(1.0f);
 		contourPaint.setStrokeMiter(1.0f);
 		contourPaint.setStrokeJoin(Paint.Join.ROUND);
 		contourPaint.setStrokeCap(Cap.ROUND);
 		contourPaint.setAntiAlias(true);
-		contourPaint.setShader(new LinearGradient(0, 0, 0, getHeight(), Color.BLACK, Color.WHITE, Shader.TileMode.MIRROR));
+		contourPaint.setShader(new LinearGradient(0, 0, 0, getHeight(), Color.BLACK, Color.BLACK, Shader.TileMode.REPEAT));
 		getHolder().addCallback(this);
 		drawingThread = new TutorialThread(getHolder(), this);
 		setFocusable(true);
@@ -75,6 +79,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			switch (currentTool) {
 			case straightLine:
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					clearRedoHistory();
 					if (!inContour) {
 						startPoint = new Point((int) event.getX(),
 								(int) event.getY());
@@ -120,6 +125,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			case curvedLine:
 				if (!editingControlPoint
 						&& event.getAction() == MotionEvent.ACTION_DOWN) {
+					clearRedoHistory();
 					if (!inContour) {
 						startPoint = new Point((int) event.getX(),
 								(int) event.getY());
@@ -193,19 +199,32 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 				return true;
 			case freeDraw:
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					startPoint = new Point((int) event.getX(),
-							(int) event.getY());
-					currentPath = new Path();
-					currentPath.moveTo(startPoint.x, startPoint.y);
-					lastContX = startPoint.x;
-					lastContY = startPoint.y;
-					drawingContinuous = true;
+					clearRedoHistory();
+					if (!inContour) {
+						startPoint = new Point((int) event.getX(),
+								(int) event.getY());
+						currentPath = new Path();
+						currentPath.moveTo(startPoint.x, startPoint.y);
+						lastContX = startPoint.x;
+						lastContY = startPoint.y;
+						drawingContinuous = true;
+						contourStart = startPoint;
+						inContour = true;
+					}
+					else {
+						startPoint = lastContourEnd;
+						currentPath = new Path();
+						currentPath.moveTo(startPoint.x, startPoint.y);
+						lastContX = startPoint.x;
+						lastContY = startPoint.y;
+						drawingContinuous = true;
+					}
 				} else if (drawingContinuous
 						&& event.getAction() == MotionEvent.ACTION_UP) {
 					Point end = new Point((int) event.getX(),
 							(int) event.getY());
 					currentPath.lineTo(end.x, end.y);
-					Stroke stroke = new Stroke(startPoint, end, end,
+					Stroke stroke = new Stroke(currentPath,
 							continuousPaint);
 					synchronized (pathList) {
 						pathList.add(stroke);
@@ -214,6 +233,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 					redoHistory.clear();
 					drawingContinuous = false;
 					startPoint = null;
+					lastContourEnd = end;
+					checkClosePath();
 				} else if (drawingContinuous
 						&& event.getAction() == MotionEvent.ACTION_MOVE) {
 					currentPath.lineTo((int) event.getX(), (int) event.getY());
@@ -258,16 +279,24 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		Point mid, end;
 		synchronized (pathList) {
 			for (Stroke s : pathList) {
-				mid = s.getControl();
-				end = s.getEnd();
-				Log.v("LOL", mid + " " + end);
-				contour.quadTo(mid.x, mid.y, end.x, end.y);
+				if (s.isComponentWisePath()){
+					contour.addPath(s.getPath());
+				}
+				else {
+					mid = s.getControl();
+					end = s.getEnd();
+					contour.quadTo(mid.x, mid.y, end.x, end.y);
+				}
+				
 			}
 		}
-		contour.lineTo(contourStart.x, contourStart.y);
+		contour.close();
 
 		synchronized (contourList) {
 			contourList.add(new Stroke(contour, contourPaint));
+		}
+		synchronized (pathList) {
+			pathList.clear();
 		}
 		inContour = false;
 		contourStart = null;
@@ -275,10 +304,29 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		clearRedoHistory();
 
 	}
+	
+	public void checkClear() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+		builder.setMessage("Clear all contours? This cannot be undone.")
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int id) {
+								clear();
+							}
+						})
+				.setNegativeButton("No",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int id) {
+								;
+							}
+						}).show();
+	}
 
 	private static int distBetween(Point p1, Point p2) {
 		int dx = p1.x - p2.x, dy = p1.y - p2.y;
-		return (int) Math.abs(dx * dx + dy * dy);
+		return (int)Math.sqrt((dx * dx) + (dy * dy));
 	}
 
 	@Override
@@ -348,7 +396,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		synchronized (pathList) {
 			if (pathList.size() > 0){
 				Stroke s = pathList.remove(pathList.size() - 1);
-				lastContourEnd = s.getEnd();
+				lastContourEnd = s.getStart();
 				redoHistory.add(s);
 			}
 			else{
@@ -399,8 +447,9 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 						endPoint.x, endPoint.y);
 				pathList.add(new Stroke(startPoint, controlPointHandle,
 						endPoint, defaultPaint));
+				lastContourEnd = endPoint;
 			}
-			clearRedoHistory();
+			checkClosePath();
 		}
 	}
 
@@ -427,6 +476,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		startPoint = null;
 		endPoint = null;
 		controlPointHandle = null;
+		inContour = false;
 	}
 
 	private class TutorialThread extends Thread {

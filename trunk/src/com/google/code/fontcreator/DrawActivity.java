@@ -108,7 +108,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			break;
 		case R.id.clearToolButton:
-			drawPanel.clear();
+			drawPanel.checkClear();
 			break;
 		case R.id.eraserToolButton:
 			currentTool = DrawingTools.eraser;
