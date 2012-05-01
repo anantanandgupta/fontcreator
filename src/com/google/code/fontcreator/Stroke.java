@@ -1,5 +1,7 @@
 package com.google.code.fontcreator;
 
+import java.util.LinkedList;
+
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -13,6 +15,8 @@ public class Stroke {
 	
 	private boolean isComponentWise;
 
+	private LinkedList<Point> segments;
+	
 	public Point getStart() {
 		return start;
 	}
@@ -24,9 +28,12 @@ public class Stroke {
 	public Point getControl() {
 		return control;
 	}
+	
+	public LinkedList<Point> getSegments() {
+		return segments;
+	}
 
 	public Stroke(Point start, Point control, Point end, Paint paint) {
-		Log.v("WTF",start+" " + control + " " + end);
 		this.start = new Point(start);
 		this.end = new Point(end);
 		this.control = new Point(control);
@@ -38,10 +45,49 @@ public class Stroke {
 		isComponentWise = false;
 	}
 	
-	public Stroke( Path path, Paint paint) {
-		this.path = path;
+	public Stroke(Paint paint) {
 		this.paint = paint;
+		this.path = new Path();
 		isComponentWise = true;
+		segments = new LinkedList<Point>();
+	}
+	
+	public void start(Point p) {
+		if (isComponentWise) {
+			Point temp = new Point (p);
+			segments.add(temp);
+			start = temp;
+			path.moveTo(temp.x, temp.y);
+		}
+	}
+	
+	public void addQuad(Point control, Point end) {
+		if (isComponentWise) {
+			Point tempC = new Point(control), tempE = new Point(end);
+			segments.add(tempC);
+			segments.add(tempE);
+			path.quadTo(control.x, control.y, end.x, end.y);
+		}
+	}
+	
+	public void end(Point control, Point end) {
+		if (isComponentWise) {
+			Point tempC = new Point(control), tempE = new Point(end);
+			segments.add(tempC);
+			segments.add(tempE);
+			path.quadTo(control.x, control.y, end.x, end.y);
+			this.end = tempE;
+		}
+	}
+	
+	public void close() {
+		if (isComponentWise) {
+			segments.add(start);
+			segments.add(start);
+			this.end = new Point(start);
+			path.quadTo(start.x, start.y, start.x, start.y);
+			path.close();
+		}
 	}
 
 	public Path getPath() {
