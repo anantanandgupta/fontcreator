@@ -14,7 +14,7 @@ import com.google.typography.font.sfntly.table.truetype.Glyph;
 import com.google.typography.font.sfntly.table.truetype.GlyphTable;
 import com.google.typography.font.sfntly.table.truetype.LocaTable;
 
-public class font {
+public class SharonFont {
 	//the actual font object
 	private Font mFont;
 	//Font factory
@@ -23,7 +23,7 @@ public class font {
 	/**
 	 * Constructor
 	 */
-	public font(){
+	public SharonFont(){
 		mFontFactory = FontFactory.getInstance();
 		initDefaultFont();
 	}
