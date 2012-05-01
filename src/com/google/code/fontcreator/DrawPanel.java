@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.code.fontcreator.DrawActivity.DrawingTools;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,7 +18,6 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -35,6 +32,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private Point startPoint = null, controlPointHandle = null,
 			endPoint = null, lastContourEnd = null, contourStart = null;
 	private Stroke currentPath;
+	private Path erasePath;
 	private Paint defaultPaint = null, continuousPaint = null, contourPaint = null;
 	private int lastDownX, lastDownY, lastContX, lastContY;
 	private DrawActivity.DrawingTools currentTool;
@@ -246,8 +244,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 					drawingContinuous = false;
 				}
 				return true;
-			case eraser:
-				break;
 			}
 			return false;
 		}
@@ -297,19 +293,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 					contour.addQuad(s.getControl(), s.getEnd());
 				}
 			}
-			/*start = pathList.get(0).getStart();
-			for (Stroke s : pathList) {
-				if (s.isComponentWisePath()){
-					contour.addPath(s.getPath());
-				}
-				else {
-					mid = s.getControl();
-					end = s.getEnd();
-					contour.quadTo(mid.x, mid.y, end.x, end.y);
-				}
-				
-			}
-			end = pathList.get(pathList.size() - 1).getEnd();*/
 		}
 		contour.close();
 
