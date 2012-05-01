@@ -28,7 +28,7 @@ public class ManageFontActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent myIntent = new Intent(v.getContext(), ManageFontActivity.class);
+				Intent myIntent = new Intent(v.getContext(), ExportActivity.class);
                 startActivityForResult(myIntent, 0);				
 			}
 		});

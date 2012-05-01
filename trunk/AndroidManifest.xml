@@ -46,6 +46,11 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
+            android:name=".ExportActivity"
+            android:label="Export Activity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
             android:name=".ManageFontActivity"
             android:label="Manage Font Activity"
             android:screenOrientation="portrait"
