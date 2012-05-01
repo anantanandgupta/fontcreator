@@ -337,9 +337,12 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	public void onDraw(Canvas canvas) {
 		canvas.drawColor(Color.WHITE);
 		synchronized (contourList) {
+			Path p = new Path();
 			for (Stroke stroke : contourList) {
-				canvas.drawPath(stroke.getPath(), stroke.getPaint());
+				p.addPath(stroke.getPath());
 			}
+			p.close();
+			canvas.drawPath(p, contourPaint);
 		}
 		synchronized (pathList) {
 			for (Stroke stroke : pathList) {
@@ -418,22 +421,26 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	public void redo() {
 		finalizeDanglingControlPoints();
 		boolean undoPath = false;
-		synchronized (pathList) {
-			if (redoHistory.size() > 0){
-				Stroke s = redoHistory.remove(redoHistory.size() - 1);
-				lastContourEnd = s.getEnd();
-				pathList.add(s);
-			}
+		synchronized (contourList) {
+			if (contourRedoHistory.size() > 0) 
+				contourList.add(contourRedoHistory.remove(contourRedoHistory.size()-1));
 			else {
 				undoPath = true;
 			}
 		}
 		if (undoPath) {
-			synchronized (contourList) {
-				if (contourRedoHistory.size() > 0) 
-					contourList.add(contourRedoHistory.remove(contourRedoHistory.size()-1));
+			synchronized (pathList) {
+				if (redoHistory.size() > 0){
+					Stroke s = redoHistory.remove(redoHistory.size() - 1);
+					lastContourEnd = s.getEnd();
+					pathList.add(s);
+				}
+				else {
+					undoPath = true;
+				}
 			}
 		}
+
 	}
 	
 	private void clearRedoHistory() {
