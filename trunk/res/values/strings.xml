@@ -2,7 +2,7 @@
 <resources>
 
     <string name="hello">Hello World, FontCreatorLocalActivity!</string>
-    <string name="app_name">FontCreatorLocal</string>
+    <string name="app_name">Font Maker</string>
     <string name="A">A</string>
     <string name="prev">&lt;&lt;Prev</string>
     <string name="next">Next>></string>
