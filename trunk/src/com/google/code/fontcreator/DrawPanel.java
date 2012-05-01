@@ -2,6 +2,8 @@ package com.google.code.fontcreator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.code.fontcreator.DrawActivity.DrawingTools;
@@ -32,7 +34,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			inContour = false;
 	private Point startPoint = null, controlPointHandle = null,
 			endPoint = null, lastContourEnd = null, contourStart = null;
-	private Path currentPath;
+	private Stroke currentPath;
 	private Paint defaultPaint = null, continuousPaint = null, contourPaint = null;
 	private int lastDownX, lastDownY, lastContX, lastContY;
 	private DrawActivity.DrawingTools currentTool;
@@ -203,8 +205,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 					if (!inContour) {
 						startPoint = new Point((int) event.getX(),
 								(int) event.getY());
-						currentPath = new Path();
-						currentPath.moveTo(startPoint.x, startPoint.y);
+						currentPath = new Stroke(continuousPaint);
+						currentPath.start(startPoint);
 						lastContX = startPoint.x;
 						lastContY = startPoint.y;
 						drawingContinuous = true;
@@ -213,8 +215,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 					}
 					else {
 						startPoint = lastContourEnd;
-						currentPath = new Path();
-						currentPath.moveTo(startPoint.x, startPoint.y);
+						currentPath = new Stroke(continuousPaint);
+						currentPath.start(startPoint);
 						lastContX = startPoint.x;
 						lastContY = startPoint.y;
 						drawingContinuous = true;
@@ -223,11 +225,9 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 						&& event.getAction() == MotionEvent.ACTION_UP) {
 					Point end = new Point((int) event.getX(),
 							(int) event.getY());
-					currentPath.lineTo(end.x, end.y);
-					Stroke stroke = new Stroke(currentPath,
-							continuousPaint);
+					currentPath.end(end, end);
 					synchronized (pathList) {
-						pathList.add(stroke);
+						pathList.add(currentPath);
 					}
 					currentPath = null;
 					redoHistory.clear();
@@ -237,7 +237,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 					checkClosePath();
 				} else if (drawingContinuous
 						&& event.getAction() == MotionEvent.ACTION_MOVE) {
-					currentPath.lineTo((int) event.getX(), (int) event.getY());
+					Point curr = new Point((int) event.getX(), (int) event.getY());
+					currentPath.addQuad(curr, curr);
 					lastContX = (int) event.getX();
 					lastContY = (int) event.getY();
 				} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
@@ -274,10 +275,29 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void finalizeContour() {
-		Path contour = new Path();
+		/*Path contour = new Path();
 		contour.moveTo(contourStart.x, contourStart.y);
-		Point mid, end;
+		Point start, mid, end;*/
+		Stroke contour = new Stroke(contourPaint);
 		synchronized (pathList) {
+			LinkedList<Point> segments;
+			Point start = pathList.get(0).getStart();
+			Iterator<Point> iter;
+			contour.start(start);
+			for (Stroke s : pathList) {
+				if (s.isComponentWisePath()) {
+					segments = s.getSegments();
+					iter = segments.iterator();
+					iter.next(); //get rid of start
+					while (iter.hasNext()) {
+						contour.addQuad(iter.next(), iter.next());
+					}
+				}
+				else {
+					contour.addQuad(s.getControl(), s.getEnd());
+				}
+			}
+			/*start = pathList.get(0).getStart();
 			for (Stroke s : pathList) {
 				if (s.isComponentWisePath()){
 					contour.addPath(s.getPath());
@@ -289,11 +309,12 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				
 			}
+			end = pathList.get(pathList.size() - 1).getEnd();*/
 		}
 		contour.close();
 
 		synchronized (contourList) {
-			contourList.add(new Stroke(contour, contourPaint));
+			contourList.add(contour);
 		}
 		synchronized (pathList) {
 			pathList.clear();
@@ -357,7 +378,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.drawCircle(controlPointHandle.x, controlPointHandle.y, 50,
 					defaultPaint);
 		} else if (drawingContinuous) {
-			canvas.drawPath(currentPath, continuousPaint);
+			canvas.drawPath(currentPath.getPath(), continuousPaint);
 		}
 	}
 
