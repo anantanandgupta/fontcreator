@@ -2,12 +2,12 @@ package com.google.code.fontcreator;
 
 import java.util.ArrayList;
 
-public class Font {
+public class BonnieFont {
 
 	private ArrayList<Character> chars;
 	private ArrayList<FontCharacter> charImages;
 
-	public Font(){
+	public BonnieFont(){
 		//TODO: 
 		//SOMETHING
 		chars = new ArrayList<Character>();
