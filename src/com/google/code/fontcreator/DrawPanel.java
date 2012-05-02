@@ -18,6 +18,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -33,7 +34,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			endPoint = null, lastContourEnd = null, contourStart = null;
 	private Stroke currentPath;
 	private Path erasePath;
-	private Paint defaultPaint = null, continuousPaint = null, contourPaint = null;
+	private Paint blackPaint = null, drawPathPaint = null, continuousPaint = null, contourPaint = null;
 	private int lastDownX, lastDownY, lastContX, lastContY;
 	private DrawActivity.DrawingTools currentTool;
 
@@ -43,14 +44,22 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		contourList = Collections.synchronizedList(new ArrayList<Stroke>());
 		redoHistory = new ArrayList<Stroke>();
 		contourRedoHistory = new ArrayList<Stroke>();
-		defaultPaint = new Paint();
-		defaultPaint.setColor(Color.BLUE);
-		defaultPaint.setStyle(Paint.Style.STROKE);
-		defaultPaint.setStrokeWidth(1.0f);
-		defaultPaint.setStrokeMiter(1.0f);
-		defaultPaint.setStrokeJoin(Paint.Join.MITER);
-		defaultPaint.setStrokeCap(Cap.SQUARE);
-		defaultPaint.setAntiAlias(true);
+		blackPaint = new Paint();
+		blackPaint.setColor(Color.BLACK);
+		blackPaint.setStyle(Paint.Style.STROKE);
+		blackPaint.setStrokeWidth(1.0f);
+		blackPaint.setStrokeMiter(1.0f);
+		blackPaint.setStrokeJoin(Paint.Join.MITER);
+		blackPaint.setStrokeCap(Cap.SQUARE);
+		blackPaint.setAntiAlias(true);
+		drawPathPaint = new Paint();
+		drawPathPaint.setColor(Color.BLUE);
+		drawPathPaint.setStyle(Paint.Style.STROKE);
+		drawPathPaint.setStrokeWidth(1.0f);
+		drawPathPaint.setStrokeMiter(1.0f);
+		drawPathPaint.setStrokeJoin(Paint.Join.MITER);
+		drawPathPaint.setStrokeCap(Cap.SQUARE);
+		drawPathPaint.setAntiAlias(true);
 		continuousPaint = new Paint();
 		continuousPaint.setColor(Color.BLUE);
 		continuousPaint.setStyle(Paint.Style.STROKE);
@@ -75,6 +84,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		Log.v("COORD", new Point((int) event.getX(),
+								(int) event.getY()) + "");
 		synchronized (drawingThread.getSurfaceHolder()) {
 			switch (currentTool) {
 			case straightLine:
@@ -105,7 +116,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 							(end.y - startPoint.y) / 2 + startPoint.y, end.x,
 							end.y);
 					Stroke stroke = new Stroke(startPoint, end, end,
-							defaultPaint);
+							drawPathPaint);
 					synchronized (pathList) {
 						pathList.add(stroke);
 					}
@@ -151,7 +162,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 						out.quadTo(controlPointHandle.x, controlPointHandle.y,
 								endPoint.x, endPoint.y);
 						Stroke stroke = new Stroke(startPoint,
-								controlPointHandle, endPoint, defaultPaint);
+								controlPointHandle, endPoint, drawPathPaint);
 						synchronized (pathList) {
 							pathList.add(stroke);
 						}
@@ -354,18 +365,22 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			Path out = new Path();
 			out.moveTo(startPoint.x, startPoint.y);
 			out.quadTo(end.x, end.y, end.x, end.y);
-			canvas.drawPath(out, defaultPaint);
+			canvas.drawPath(out, drawPathPaint);
 		} else if (editingControlPoint) {
 			Path out = new Path();
 			out.moveTo(startPoint.x, startPoint.y);
 			out.quadTo(controlPointHandle.x, controlPointHandle.y, endPoint.x,
 					endPoint.y);
-			canvas.drawPath(out, defaultPaint);
+			canvas.drawPath(out, drawPathPaint);
 			canvas.drawCircle(controlPointHandle.x, controlPointHandle.y, 50,
-					defaultPaint);
+					drawPathPaint);
 		} else if (drawingContinuous) {
 			canvas.drawPath(currentPath.getPath(), continuousPaint);
 		}
+		float height = getHeight();
+		float width = getWidth();
+		canvas.drawLine(0.0f, height * 3f/4f, width, height * 3f/4f, blackPaint);
+		canvas.drawLine(width * 1.0f/5.0f, 0f, width * 1.0f/5.0f, height, blackPaint);
 	}
 
 	@Override
@@ -457,7 +472,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 				out.quadTo(controlPointHandle.x, controlPointHandle.y,
 						endPoint.x, endPoint.y);
 				pathList.add(new Stroke(startPoint, controlPointHandle,
-						endPoint, defaultPaint));
+						endPoint, drawPathPaint));
 				lastContourEnd = endPoint;
 			}
 			checkClosePath();
