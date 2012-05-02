@@ -212,6 +212,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 			public void onClick(View view) {
 				if(saveGlyph())
 				{
+					drawPanel.save();
 					Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
 					toast.show();
 				}
