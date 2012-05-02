@@ -1,5 +1,6 @@
 package com.google.code.fontcreator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -485,7 +486,12 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	public void save() {
 		FontManager fm = new FontManager(getContext());
 		Glyph f = fm .makeGlyph(fm.getGlyph("A"), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f));
-		Log.v("FONT",f.toString());
+		try {
+			fm.changeGlyph("A", f);
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.v("AHHHH", "FUCK ANDROID");
+		}
 	}
 
 	public DrawActivity.DrawingTools getCurrentTool() {

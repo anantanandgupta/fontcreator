@@ -1,8 +1,8 @@
 package com.google.code.fontcreator;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.WriteAbortedException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,129 +11,223 @@ import android.graphics.Point;
 import android.util.Log;
 
 import com.google.typography.font.sfntly.Font;
+import com.google.typography.font.sfntly.Font.PlatformId;
 import com.google.typography.font.sfntly.FontFactory;
 import com.google.typography.font.sfntly.Tag;
 import com.google.typography.font.sfntly.data.ReadableFontData;
 import com.google.typography.font.sfntly.data.WritableFontData;
-import com.google.typography.font.sfntly.table.Table.Builder;
+import com.google.typography.font.sfntly.table.Header;
 import com.google.typography.font.sfntly.table.core.CMap;
 import com.google.typography.font.sfntly.table.core.CMapTable;
+import com.google.typography.font.sfntly.table.core.CMapTable.CMapFilter;
+import com.google.typography.font.sfntly.table.core.CMapTable.CMapId;
+import com.google.typography.font.sfntly.table.core.FontHeaderTable;
+import com.google.typography.font.sfntly.table.core.MaximumProfileTable;
 import com.google.typography.font.sfntly.table.truetype.Glyph;
+import com.google.typography.font.sfntly.table.truetype.Glyph.Builder;
 import com.google.typography.font.sfntly.table.truetype.GlyphTable;
 import com.google.typography.font.sfntly.table.truetype.LocaTable;
 
 public class FontManager {
-	//the actual font object
+	// the actual font object
 	private Font mFont;
-	//Font factory
+	// Font factory
 	private FontFactory mFontFactory;
-	//Font builder
-	private Font.Builder mFontBuilder;
+	// Font builder
 	private Context context;
+
 	/**
 	 * Constructor
 	 */
-	public FontManager(Context context){
+	public FontManager(Context context) {
 		this.context = context;
 		mFontFactory = FontFactory.getInstance();
 		initDefaultFont();
 	}
-	
-	private void initDefaultFont(){
+
+	private void initDefaultFont() {
 		try {
-			mFont = mFontFactory.loadFonts(context.getAssets().open("fonts/arial.ttf"))[0];
-			mFontBuilder = mFontFactory.loadFontsForBuilding(context.getAssets().open("fonts/arial.ttf"))[0];
+			mFont = mFontFactory.loadFonts(context.getAssets().open(
+					"fonts/arial.ttf"))[0];
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("failed to load font");
 		}
-				
+
 	}
-	
-	public Glyph getGlyph(String glyphCharacter){
-		//get the glyph table
+
+	public int getGlyphId(String glyphCharacter) {
+		// get the glyph table
 		GlyphTable glyphTable = mFont.getTable(Tag.glyf);
-		//get the loca table to get the offsets of each individual glyph
+		// get the loca table to get the offsets of each individual glyph
 		LocaTable locaTable = mFont.getTable(Tag.loca);
-		//Get the cMap table from the font
-		CMapTable cMapTable =  mFont.getTable(Tag.cmap);
-		Iterator<CMap> iter = cMapTable.iterator();
+		// Get the cMap table from the font
+		CMapTable cMapTable = mFont.getTable(Tag.cmap);
+		Iterator<CMap> iter = cMapTable.iterator(new CMapFilter() {
+
+			@Override
+			public boolean accept(CMapId cmapId) {
+				return cmapId.platformId() == PlatformId.Windows.value()
+						&& cmapId.encodingId() == 1;
+			}
+		});
 		CMap cMap = iter.next();
-		//get glyph Id for specified character
+		// get glyph Id for specified character
 		int glyphId = cMap.glyphId(glyphCharacter.codePointAt(0));
-		//get glyphLength and Offset
+		// get glyphLength and Offset
+		return glyphId;
+	}
+
+	public Glyph getGlyph(String glyphCharacter) {
+		// get the glyph table
+		GlyphTable glyphTable = mFont.getTable(Tag.glyf);
+		// get the loca table to get the offsets of each individual glyph
+		LocaTable locaTable = mFont.getTable(Tag.loca);
+		int glyphId = getGlyphId(glyphCharacter);
 		int glyphLength = locaTable.glyphLength(glyphId);
 		int glyphOffset = locaTable.glyphOffset(glyphId);
-	
+
 		return glyphTable.glyph(glyphOffset, glyphLength);
 	}
-	
-	public void changeGlyph(String glyphCharacter, Glyph newGlyph){
-		//Iterate through each of the glyphs in the arraylist
+
+	public void changeGlyph(String glyphCharacter, Glyph newGlyph)
+			throws IOException {
+		// Iterate through each of the glyphs in the arraylist
 		// and insert each of the new glyphs into the font.
-		//get the glyph table
-		
-		GlyphTable glyphs = mFont.getTable(Tag.glyf);
-		LocaTable locaTable = mFont.getTable(Tag.loca);
-		//Get the cMap table from the font
-		CMapTable cMapTable =  mFont.getTable(Tag.cmap);
-		int newGlyphId = cMapTable.iterator().next().glyphId(glyphCharacter.codePointAt(0));
-		WritableFontData data = WritableFontData.createWritableFontData(0);
-		ReadableFontData glyphFontData = glyphs.readFontData();
-		ReadableFontData cmapFontData = cMapTable.readFontData();
-		ReadableFontData locaFontData = locaTable.readFontData();
-		int dataOffset = 0;
-		for (int glyphID = 0; glyphID < locaTable.numGlyphs(); glyphID++) {
-			int offset = locaTable.glyphOffset(glyphID);
-			int length = locaTable.glyphLength(glyphID);
-			Glyph curr = glyphs.glyph(offset, length);
-			if (newGlyphId != glyphID) {
-				byte[] glyphData = new byte[curr.readFontData().length()];
-				curr.readFontData().readBytes(0, glyphData, 0, curr.readFontData().length());
-				data.writeBytes(dataOffset, glyphData);
-				dataOffset += glyphData.length;
-			}
-			
+		// get the glyph table
+		Font.Builder mFontBuilder;
+		mFontBuilder = mFontFactory.loadFontsForBuilding(context.getAssets()
+				.open("fonts/arial.ttf"))[0];
+
+		LocaTable.Builder locaTableBuilder = (LocaTable.Builder) mFontBuilder
+				.getTableBuilder(Tag.loca);
+		GlyphTable.Builder glyphTableBuilder = (GlyphTable.Builder) mFontBuilder
+				.getTableBuilder(Tag.glyf);
+		List<Integer> originalLocas = locaTableBuilder.locaList();
+		glyphTableBuilder.setLoca(originalLocas);
+
+		ReadableFontData glyphData = glyphTableBuilder.data();
+		WritableFontData glyphBytes = WritableFontData
+				.createWritableFontData(0);
+		glyphData.copyTo(glyphBytes);
+
+		/*
+		 * int numLocas = locaTableBuilder.numLocas(); int lastLoca =
+		 * locaTableBuilder.loca(numLocas - 1); int numGlyphs =
+		 * locaTableBuilder.numGlyphs(); int firstGlyphOffset =
+		 * locaTableBuilder.glyphOffset(0); int firstGlyphLength =
+		 * locaTableBuilder.glyphLength(0); int glyphTableSize =
+		 * glyphTableBuilder.header().length();
+		 */
+		int glyphId = getGlyphId(glyphCharacter);
+
+		List<? extends Glyph.Builder<? extends Glyph>> glyphBuilders = glyphTableBuilder
+				.glyphBuilders();
+		Log.v("BUILDER LEN", glyphBuilders.size() + "");
+		Builder<? extends Glyph> glyphBuilder = glyphBuilders.get(glyphId);
+		glyphBuilder.setData(newGlyph.readFontData());
+		List<Integer> locaList = glyphTableBuilder.generateLocaList();
+		locaTableBuilder.setLocaList(locaList);
+
+		Font font = mFontBuilder.build();
+
+		try {
+			mFontFactory.serializeFont(font, context.openFileOutput(
+					"myFont1.ttf", Context.MODE_WORLD_READABLE));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		
-		Builder<?> glyphTableBuilder = mFontBuilder.getTableBuilder(Tag.glyf);
-		//get the loca table to get the offsets of each individual glyph
-		LocaTable locaTable = mFont.getTable(Tag.loca);
-		//Get the cMap table from the font
-		CMapTable cMapTable =  mFont.getTable(Tag.cmap);
-		Iterator<CMap> iter = cMapTable.iterator();
-		CMap cMap = iter.next();
-		int i = 0;
-		for(Glyph g : glyphs){
-			byte[] b  = new byte[g.dataLength()];
-			g.readFontData().readBytes(0, b, 0, g.dataLength());
-			int glyphId = cMap.glyphId(glyphCharacters.get(i).codePointAt(0));
-			int glyphOffset = locaTable.glyphOffset(glyphId);
-			glyphTableBuilder.data().writeBytes(glyphId, b, glyphOffset, g.dataLength());
-			i++;
-		}
-		glyphTableBuilder.build();
+
+		/*
+		 * LocaTable locaTable = font.getTable(Tag.loca); GlyphTable glyphTable
+		 * = font.getTable(Tag.glyf); ReadableFontData newGlyphData =
+		 * glyphTable.readFontData(); WritableFontData newGlyphBytes =
+		 * WritableFontData.createWritableFontData(0);
+		 * newGlyphData.copyTo(newGlyphBytes);
+		 * 
+		 * 
+		 * Header newHeader = glyphTable.header();
+		 */
+
+		// Font.Builder fontBuilder = mFontBuilder.getTableBuilder(Tag.glyf);
+
+		/*
+		 * Builder<? extends Table> glyphbuilder =
+		 * (mFontBuilder.getTableBuilder(Tag.glyf)); GlyphTable glyphs =
+		 * mFont.getTable(Tag.glyf); LocaTable locaTable =
+		 * mFont.getTable(Tag.loca); //Get the cMap table from the font
+		 * CMapTable cMapTable = mFont.getTable(Tag.cmap); int newGlyphId =
+		 * cMapTable.iterator(new CMapFilter() {
+		 * 
+		 * @Override public boolean accept(CMapId cmapId) { return
+		 * cmapId.platformId() == PlatformId.Windows.value() &&
+		 * cmapId.encodingId() == 1; }
+		 * }).next().glyphId(glyphCharacter.codePointAt(0)); WritableFontData
+		 * glyphTableData = WritableFontData.createWritableFontData(0); int
+		 * dataOffset = 0; for (int glyphID = 0; glyphID <
+		 * locaTable.numGlyphs(); glyphID++) { int offset =
+		 * locaTable.glyphOffset(glyphID); int length =
+		 * locaTable.glyphLength(glyphID); Glyph curr = glyphs.glyph(offset,
+		 * length); if (newGlyphId != glyphID) { byte[] glyphData = new
+		 * byte[curr.readFontData().length()]; curr.readFontData().readBytes(0,
+		 * glyphData, 0, glyphData.length);
+		 * glyphTableData.writeBytes(dataOffset, glyphData); dataOffset +=
+		 * glyphData.length; } else { byte[] glyphData = new
+		 * byte[newGlyph.readFontData().length()];
+		 * newGlyph.readFontData().readBytes(0, glyphData, 0, glyphData.length);
+		 * glyphTableData.writeBytes(dataOffset, glyphData); dataOffset +=
+		 * glyphData.length; } }
+		 * 
+		 * Header glyphHeader = new Header(Tag.glyf); GlyphTable.Builder
+		 * glyphBuilder = GlyphTable.Builder.createBuilder(glyphHeader,
+		 * glyphTableData); List<Integer> locas =
+		 * glyphBuilder.generateLocaList(); WritableFontData locaData =
+		 * WritableFontData.createWritableFontData(0); for (int i = 0; i <
+		 * locas.size(); i++) { locaData.writeBytes(i*4,
+		 * intToByteArray(locas.get(i))); } Header locaHeader = new
+		 * Header(Tag.loca); LocaTable.Builder locaBuilder =
+		 * LocaTable.Builder.createBuilder(locaHeader, locaData);
+		 */
+		/*
+		 * Builder<?> glyphTableBuilder =
+		 * mFontBuilder.getTableBuilder(Tag.glyf); //get the loca table to get
+		 * the offsets of each individual glyph LocaTable locaTable =
+		 * mFont.getTable(Tag.loca); //Get the cMap table from the font
+		 * CMapTable cMapTable = mFont.getTable(Tag.cmap); Iterator<CMap> iter =
+		 * cMapTable.iterator(); CMap cMap = iter.next(); int i = 0; for(Glyph g
+		 * : glyphs){ byte[] b = new byte[g.dataLength()];
+		 * g.readFontData().readBytes(0, b, 0, g.dataLength()); int glyphId =
+		 * cMap.glyphId(glyphCharacters.get(i).codePointAt(0)); int glyphOffset
+		 * = locaTable.glyphOffset(glyphId);
+		 * glyphTableBuilder.data().writeBytes(glyphId, b, glyphOffset,
+		 * g.dataLength()); i++; } glyphTableBuilder.build();
+		 */
 	}
-	
-	public Glyph makeGlyph (Glyph originalGlyph, List<Stroke> contourList, int baselineHeight, int baselineWidth){
+
+	public Glyph makeGlyph(Glyph originalGlyph, List<Stroke> contourList,
+			int baselineHeight, int baselineWidth) {
 		WritableFontData data = WritableFontData.createWritableFontData(0);
 		int numContours = contourList.size();
 		int offset = 0;
-		
-		//write the number of contours as int16
+
+		// write the number of contours as int16
 		String tag = "Font";
 		Log.v(tag, "num contours: " + numContours);
 		byte[] b = intToInt16(numContours);
-		data.writeBytes(0,b);
+		data.writeBytes(0, b);
 		offset = offset + b.length;
 		int xMax = Integer.MIN_VALUE, yMax = Integer.MIN_VALUE, xMin = Integer.MAX_VALUE, yMin = Integer.MAX_VALUE;
-		for(Stroke s : contourList){
+		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				int xcoor= p.x - baselineWidth;
+				int xcoor = p.x - baselineWidth;
 				int ycoor = baselineHeight - p.y;
-				
-				if (xcoor >xMax) {
+
+				if (xcoor > xMax) {
 					xMax = xcoor;
 				}
 				if (xcoor < xMin) {
@@ -149,7 +243,7 @@ public class FontManager {
 		}
 
 		Log.v(tag, "xMin: " + xMin);
-		//write xmin, ymin, xmax, ymax
+		// write xmin, ymin, xmax, ymax
 		b = intToInt16(xMin);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
@@ -165,59 +259,56 @@ public class FontManager {
 		b = intToInt16(yMax);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
-		
-		//store end points of each contour
+
+		// store end points of each contour
 		int pointIndex = 0;
-		for(Stroke s: contourList){
-			int endIndex = pointIndex + s.getSegments().size() -1;
+		for (Stroke s : contourList) {
+			int endIndex = pointIndex + s.getSegments().size() - 1;
 			b = intToInt16(endIndex);
 			pointIndex = endIndex;
 			data.writeBytes(offset, b);
 			offset = offset + b.length;
 			Log.v(tag, "end index: " + endIndex);
 		}
-		/*int instrSize = originalGlyph.instructionSize();
-		ReadableFontData instructions = originalGlyph.instructions();
-		b = intToInt16(instrSize);
-		data.writeBytes(offset, b);
-		offset = offset + b.length;
-		b = new byte[instructions.length()];
-		instructions.readBytes(0, b, 0, instructions.length());
-		data.writeBytes(offset, b);
-		offset = offset + b.length;*/
+		/*
+		 * int instrSize = originalGlyph.instructionSize(); ReadableFontData
+		 * instructions = originalGlyph.instructions(); b =
+		 * intToInt16(instrSize); data.writeBytes(offset, b); offset = offset +
+		 * b.length; b = new byte[instructions.length()];
+		 * instructions.readBytes(0, b, 0, instructions.length());
+		 * data.writeBytes(offset, b); offset = offset + b.length;
+		 */
 		b = intToInt16(0);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
-		
-		
+
 		byte onCurve = (byte) 1, offCurve = (byte) 0;
 		boolean isOnCurve = true;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
 				if (isOnCurve) {
 					data.writeByte(offset, onCurve);
-				}
-				else {
+				} else {
 					data.writeByte(offset, offCurve);
 				}
 				offset++;
 				isOnCurve = !isOnCurve;
 			}
 		}
-		
+
 		int last = 0;
-		for(Stroke s: contourList){
-			for(Point p: s.getSegments()){
+		for (Stroke s : contourList) {
+			for (Point p : s.getSegments()) {
 				b = intToInt16(p.x - baselineWidth - last);
 				data.writeBytes(offset, b);
 				offset = offset + b.length;
 				last = p.x - baselineWidth;
-				
+
 			}
 		}
 		last = 0;
-		for(Stroke s: contourList){
-			for(Point p: s.getSegments()){
+		for (Stroke s : contourList) {
+			for (Point p : s.getSegments()) {
 				b = intToInt16(baselineHeight - p.y - last);
 				data.writeBytes(offset, b);
 				offset = offset + b.length;
@@ -225,10 +316,10 @@ public class FontManager {
 
 			}
 		}
-		
-		if (offset %4 != 0) {
-			data.writePadding(offset, 4-offset%4);
-			offset += 4-offset%4;
+
+		if (offset % 4 != 0) {
+			data.writePadding(offset, 4 - offset % 4);
+			offset += 4 - offset % 4;
 		}
 		return new MySimpleGlyph(data);
 	}
