@@ -147,8 +147,8 @@ public class DrawActivity extends Activity implements OnClickListener {
 				@Override
 				public void onClick(View view) {
 					String abc = letterselect.getText().toString();
-					currentLetterDisplayButton.setText(abc);
 					updateGlyph(abc);
+					currentLetterDisplayButton.setText(abc);
 					ai.setCurrent(abc);
 					viewDialog.cancel();
 				}
