@@ -23,6 +23,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.google.typography.font.sfntly.table.truetype.Glyph;
+
 public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private TutorialThread drawingThread;
 	private List<Stroke> pathList, redoHistory, contourList,
@@ -84,8 +86,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		Log.v("COORD", new Point((int) event.getX(),
-								(int) event.getY()) + "");
 		synchronized (drawingThread.getSurfaceHolder()) {
 			switch (currentTool) {
 			case straightLine:
@@ -418,7 +418,12 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		synchronized (pathList) {
 			if (pathList.size() > 0){
 				Stroke s = pathList.remove(pathList.size() - 1);
-				lastContourEnd = s.getStart();
+				if (pathList.size() != 0) {
+					lastContourEnd = s.getStart();
+				}
+				else {
+					inContour = false;
+				}
 				redoHistory.add(s);
 			}
 			else{
@@ -448,10 +453,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 				if (redoHistory.size() > 0){
 					Stroke s = redoHistory.remove(redoHistory.size() - 1);
 					lastContourEnd = s.getEnd();
+					inContour = true;
 					pathList.add(s);
-				}
-				else {
-					undoPath = true;
 				}
 			}
 		}
@@ -477,6 +480,12 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			checkClosePath();
 		}
+	}
+	
+	public void save() {
+		FontManager fm = new FontManager(getContext());
+		Glyph f = fm .makeGlyph(fm.getGlyph("A"), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f));
+		Log.v("FONT",f.toString());
 	}
 
 	public DrawActivity.DrawingTools getCurrentTool() {
