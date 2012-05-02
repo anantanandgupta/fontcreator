@@ -34,5 +34,7 @@
 		<item>Sample 2</item>
 		<item>Sample 3</item>
 	</string-array>
+	<string name="select_letter_text">Select a Letter:</string>
+	<string name="do_you_want_to_save_text">Do you want to save this character?</string>
    	
 </resources>
