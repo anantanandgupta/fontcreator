@@ -1,6 +1,7 @@
 package com.google.code.fontcreator;
 
 import java.io.IOException;
+import java.io.WriteAbortedException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -67,10 +68,35 @@ public class FontManager {
 		return glyphTable.glyph(glyphOffset, glyphLength);
 	}
 	
-	public void changeGlyphs(ArrayList<String> glyphCharacters, ArrayList<Glyph> glyphs){
+	public void changeGlyph(String glyphCharacter, Glyph newGlyph){
 		//Iterate through each of the glyphs in the arraylist
 		// and insert each of the new glyphs into the font.
 		//get the glyph table
+		
+		GlyphTable glyphs = mFont.getTable(Tag.glyf);
+		LocaTable locaTable = mFont.getTable(Tag.loca);
+		//Get the cMap table from the font
+		CMapTable cMapTable =  mFont.getTable(Tag.cmap);
+		int newGlyphId = cMapTable.iterator().next().glyphId(glyphCharacter.codePointAt(0));
+		WritableFontData data = WritableFontData.createWritableFontData(0);
+		ReadableFontData glyphFontData = glyphs.readFontData();
+		ReadableFontData cmapFontData = cMapTable.readFontData();
+		ReadableFontData locaFontData = locaTable.readFontData();
+		int dataOffset = 0;
+		for (int glyphID = 0; glyphID < locaTable.numGlyphs(); glyphID++) {
+			int offset = locaTable.glyphOffset(glyphID);
+			int length = locaTable.glyphLength(glyphID);
+			Glyph curr = glyphs.glyph(offset, length);
+			if (newGlyphId != glyphID) {
+				byte[] glyphData = new byte[curr.readFontData().length()];
+				curr.readFontData().readBytes(0, glyphData, 0, curr.readFontData().length());
+				data.writeBytes(dataOffset, glyphData);
+				dataOffset += glyphData.length;
+			}
+			
+		}
+		
+		
 		Builder<?> glyphTableBuilder = mFontBuilder.getTableBuilder(Tag.glyf);
 		//get the loca table to get the offsets of each individual glyph
 		LocaTable locaTable = mFont.getTable(Tag.loca);
