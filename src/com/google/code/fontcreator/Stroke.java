@@ -82,8 +82,8 @@ public class Stroke {
 	
 	public void close() {
 		if (isComponentWise) {
-			segments.add(start);
-			segments.add(start);
+			segments.add(new Point(start));
+			segments.add(new Point(start));
 			this.end = new Point(start);
 			path.quadTo(start.x, start.y, start.x, start.y);
 			path.close();

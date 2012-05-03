@@ -102,10 +102,6 @@ public class FontManager {
 				.getTableBuilder(Tag.loca);
 		GlyphTable.Builder glyphTableBuilder = (GlyphTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.glyf);
-		NameTable.Builder nameTableBuilder = (NameTable.Builder)mFontBuilder.getTableBuilder(Tag.name);
-		NameTable.NameEntryBuilder eb = nameTableBuilder.nameBuilder(PlatformId.Windows.value(), WindowsEncodingId.UnicodeUCS2.value(), 0,4);
-		eb.setName(nameOfFont);
-		Log.v("NameBuilder Changed:", (nameTableBuilder.changed())+"");
 		
 		List<Integer> originalLocas = locaTableBuilder.locaList();
 		glyphTableBuilder.setLoca(originalLocas);
