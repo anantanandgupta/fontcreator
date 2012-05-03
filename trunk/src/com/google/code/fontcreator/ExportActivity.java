@@ -91,7 +91,7 @@ public static void email(Context context, String emailTo, String emailCC,
 		 emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailText);
 	    
 		emailIntent.putExtra(android.content.Intent.EXTRA_STREAM,
-				Uri.parse("file://" + strFile));
+				Uri.parse(/*"file://" +*/ strFile));
 		
 		 context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
 		
