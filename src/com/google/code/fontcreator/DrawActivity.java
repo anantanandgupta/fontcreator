@@ -1,25 +1,21 @@
 package com.google.code.fontcreator;
 
-import com.google.typography.font.sfntly.table.truetype.Glyph;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.PopupWindow;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 public class DrawActivity extends Activity implements OnClickListener {
@@ -164,13 +160,15 @@ public class DrawActivity extends Activity implements OnClickListener {
 			viewDialog.show();
 			break;
 		case R.id.prevButton:
-				updateGlyph(ai.prev());
+			ai.prev();
+			saveGlyphDialog(-1);
 			break;
 		case R.id.saveButton:
-			saveGlyphDialog();
+			saveGlyphDialog(0);
 			break;
 		case R.id.nextButton:
-			updateGlyph(ai.next());
+			ai.next();
+			saveGlyphDialog(1);
 			break;
 		}
 	}
@@ -195,7 +193,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	private void saveGlyphDialog(){
+	private void saveGlyphDialog(final int saveCase){
 		final AlertDialog viewDialog;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -210,17 +208,9 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View view) {
-				if(saveGlyph())
-				{
-					drawPanel.save();
-					Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
-					toast.show();
-				}
-				else
-				{
-					Toast toast = Toast.makeText(getApplicationContext(), "Error saving letter, no save made.", Toast.LENGTH_LONG);
-					toast.show();
-				}
+				drawPanel.save();
+				Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
+				toast.show();
 				viewDialog.cancel();
 			}
 		});
@@ -229,18 +219,24 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View view) {
+				if(saveCase==-1)
+					ai.next();
+				else if(saveCase==1)
+					ai.prev();
 				viewDialog.cancel();
+			}
+		});
+		viewDialog.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				currentLetterDisplayButton.setText(ai.getCurrent());
 			}
 		});
 		viewDialog.show();
 	}
 
-	private boolean saveGlyph() {
-		return true;
-	}
 	private void updateGlyph(String glyphCharacter) {
-		saveGlyphDialog();
-		currentLetterDisplayButton.setText(ai.getCurrent());
 		//Glyph g = fontManager.getGlyph(glyphCharacter);
 		//TODO: Set drawing table to glyph
 	}
