@@ -203,6 +203,15 @@ public class DrawActivity extends Activity implements OnClickListener {
 		builder.setView(dialogView);
 		viewDialog = builder.create();
 
+		Button noButton = (Button)dialogView.findViewById(R.id.dont_save_glyph_button);
+		noButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				viewDialog.cancel();				
+			}
+		});
+		
 		Button saveButton = (Button)dialogView.findViewById(R.id.save_glyph_button);
 		saveButton.setOnClickListener(new OnClickListener() {
 

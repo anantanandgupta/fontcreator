@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawscreen_help_scrollview"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/blackboardbackground" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/drawscreen_help_textview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="30dp"
+            android:text="@string/help_drawscreen"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/drawscreen_help_1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="asdkfjalsdjfalsdjfalsd alsdkfja;slkdfj asdjf;laskjdfla sdlaj sdlfja;sldj fa;lsjdf ;lasjdf lkajs;dlfkj a;sldjf ;asdjf ajs; a;sdjf ;aslkdjf ;lajsd;fljas dlfja;lsd f;lasjdfl asldfja;lsjdf lasjd;lfja sldkjf alskdjf lasd;lfj ;sdljf; asldjf;lasjd lfjasldjf;askjdf;lajs dlfja;sld jf;aldjsf asjdf jas;ldjf lajsdflkjas ;ldfja;sl df"
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/drawscreen_help_2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="asdkfjalsdjfalsdjfalsd alsdkfja;slkdfj asdjf;laskjdfla sdlaj sdlfja;sldj fa;lsjdf ;lasjdf lkajs;dlfkj a;sldjf ;asdjf ajs; a;sdjf ;aslkdjf ;lajsd;fljas dlfja;lsd f;lasjdfl asldfja;lsjdf lasjd;lfja sldkjf alskdjf lasd;lfj ;sdljf; asldjf;lasjd lfjasldjf;askjdf;lajs dlfja;sld jf;aldjsf asjdf jas;ldjf lajsdflkjas ;ldfja;sl df"
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/drawscreen_help_3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="asdkfjalsdjfalsdjfalsd alsdkfja;slkdfj asdjf;laskjdfla sdlaj sdlfja;sldj fa;lsjdf ;lasjdf lkajs;dlfkj a;sldjf ;asdjf ajs; a;sdjf ;aslkdjf ;lajsd;fljas dlfja;lsd f;lasjdfl asldfja;lsjdf lasjd;lfja sldkjf alskdjf lasd;lfj ;sdljf; asldjf;lasjd lfjasldjf;askjdf;lajs dlfja;sld jf;aldjsf asjdf jas;ldjf lajsdflkjas ;ldfja;sl df"
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/drawscreen_help_4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="asdkfjalsdjfalsdjfalsd alsdkfja;slkdfj asdjf;laskjdfla sdlaj sdlfja;sldj fa;lsjdf ;lasjdf lkajs;dlfkj a;sldjf ;asdjf ajs; a;sdjf ;aslkdjf ;lajsd;fljas dlfja;lsd f;lasjdfl asldfja;lsjdf lasjd;lfja sldkjf alskdjf lasd;lfj ;sdljf; asldjf;lasjd lfjasldjf;askjdf;lajs dlfja;sld jf;aldjsf asjdf jas;ldjf lajsdflkjas ;ldfja;sl df"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+</ScrollView>
