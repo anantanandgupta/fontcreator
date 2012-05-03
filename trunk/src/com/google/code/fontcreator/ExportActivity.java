@@ -34,13 +34,15 @@ public class ExportActivity extends Activity{
 			exportSpinner = (Spinner) findViewById(R.id.exportspinner);
 			final String fontFiles[] = FontUtils.getFonts(context);
 			
+			ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, fontFiles);
+			spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
+			exportSpinner.setAdapter(spinnerArrayAdapter);
+			
 			sendButton.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View view) {
 					// Selection of the spinner
 					// Application of the Array to the Spinner
-					ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, fontFiles);
-					spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
-					exportSpinner.setAdapter(spinnerArrayAdapter);
+					
 					
 					String emailTo = "";
 					emailTo = emailField.getText().toString();
