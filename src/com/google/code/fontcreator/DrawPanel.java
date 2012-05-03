@@ -530,10 +530,10 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	public FontManager save(String letter, FontManager fm) {
+	public FontManager save(String letter, FontManager fm, String fontName) {
 		Glyph f = fm .makeGlyph(fm.getGlyph(letter), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f), getWidth());
 		try {
-			return fm.changeGlyph(letter, f, "Name");
+			return fm.changeGlyph(letter, f, fontName);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 public class MainMenuActivity extends Activity{
 
+	public static final String FILENAMEKEY = "FILENAME.KEY";
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -45,8 +46,11 @@ public class MainMenuActivity extends Activity{
 						String fontName = editText.getText().toString();
 						Toast t = Toast.makeText(getApplicationContext(), "Name is " + fontName, Toast.LENGTH_LONG);
 						t.show();
+						if (!fontName.toLowerCase().endsWith(".ttf"));
+							fontName += ".ttf";
 						Intent myIntent = new Intent(view.getContext(), DrawActivity.class);
-		                startActivityForResult(myIntent, 0);
+						myIntent.putExtra(FILENAMEKEY, fontName);
+		                startActivity(myIntent);
 					}
 				});
 				final Button cancelButton = (Button)dialogView.findViewById(R.id.name_cancel_button);
@@ -86,7 +90,7 @@ public class MainMenuActivity extends Activity{
 					@Override
 					public void onClick(View v) {
 						Intent myIntent = new Intent(v.getContext(), ManageFontActivity.class);
-		                startActivityForResult(myIntent, 0);	
+		                startActivity(myIntent);	
 		                //Will put code for specific font?
 					}
 				});
@@ -108,7 +112,7 @@ public class MainMenuActivity extends Activity{
 			@Override
 			public void onClick(View v) {
 				Intent myIntent = new Intent(v.getContext(), HelpActivity.class);
-                startActivityForResult(myIntent, 0);
+                startActivity(myIntent);
 			}
 		});
 	}

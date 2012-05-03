@@ -35,8 +35,9 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 	//private FontManager fontManager;
 
-	AlphabetIterator ai;
+	private AlphabetIterator ai;
 
+	private String fontName;
 	public enum DrawingTools {
 		straightLine, freeDraw, curvedLine
 	}
@@ -72,6 +73,11 @@ public class DrawActivity extends Activity implements OnClickListener {
 		drawPanel.setCurrentTool(DrawingTools.straightLine);
 		//fontManager = new FontManager();
 		ai = new AlphabetIterator();
+		
+		if (getIntent().getExtras().containsKey(MainMenuActivity.FILENAMEKEY))
+			fontName = getIntent().getExtras().getString(MainMenuActivity.FILENAMEKEY);
+		else 
+			fontName = "NewFont.ttf";
 		fontManager = new FontManager(this);
 		updateToolHighlight();
 		ViewTreeObserver vto = drawPanel.getViewTreeObserver();
@@ -248,7 +254,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View view) {
-				fontManager = drawPanel.save(ai.getCurrent(), fontManager);
+				fontManager = drawPanel.save(ai.getCurrent(), fontManager, fontName);
 				drawPanel.clear();
 				Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
 				toast.show();
