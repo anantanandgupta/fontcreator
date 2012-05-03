@@ -245,6 +245,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View v) {
+				drawPanel.clear();
 				viewDialog.cancel();				
 			}
 		});
