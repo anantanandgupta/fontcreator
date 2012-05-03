@@ -75,20 +75,34 @@ public class ExportActivity extends Activity{
 
 		
 public static void email(Context context, String emailTo, String emailCC,
-	    String subject, String emailText, /*List<String> filePaths */ String strFile)
+	    String subject, String emailText, String strFile)
 	{
-	    //need to "send multiple" to get more than one attachment
+	    
 	    final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 	    emailIntent.setType("text/plain");
 	    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, 
 	        new String[]{emailTo});
 	    emailIntent.putExtra(android.content.Intent.EXTRA_CC, 
 	        new String[]{emailCC});
-	    emailIntent.putExtra(Intent.EXTRA_SUBJECT, new String[]{subject});
-		emailIntent.putExtra(Intent.EXTRA_TEXT, new String[]{emailText});
+	    //emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, new String[]{subject});
+		//emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, new String[]{emailText});
+		
+		 emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
+		 emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailText);
 	    
-		emailIntent.putExtra(Intent.EXTRA_STREAM,
+		emailIntent.putExtra(android.content.Intent.EXTRA_STREAM,
 				Uri.parse("file://" + strFile));
+		
+		 context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+		
+		/*
+		 * Intent intent = new Intent(Intent.ACTION_SEND);
+intent.setType("plain/text");
+intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "some@email.address" });
+intent.putExtra(Intent.EXTRA_SUBJECT, "subject");
+intent.putExtra(Intent.EXTRA_TEXT, "mail body");
+startActivity(Intent.createChooser(intent, ""));
+		 */
 		
 		//emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailText);
 		/*
@@ -103,6 +117,6 @@ public static void email(Context context, String emailTo, String emailCC,
 	    }
 	    */
 	   // emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-	    context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+	   
 	}
 }
