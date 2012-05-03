@@ -37,6 +37,10 @@ public class FontManager {
 	private FontFactory mFontFactory;
 	// Font builder
 	private Context context;
+	
+	private String fileName;
+	
+	private boolean isDefault;
 
 	/**
 	 * Constructor
@@ -45,8 +49,25 @@ public class FontManager {
 		this.context = context;
 		mFontFactory = FontFactory.getInstance();
 		initDefaultFont();
+		fileName = "";
+		isDefault = true;
+	}
+	
+	public FontManager(Context context, String filename) {
+	  this.context = context;
+    mFontFactory = FontFactory.getInstance();
+    initFont(filename);
+    isDefault = false;
 	}
 
+	private void initFont(String filename) {
+	  try {
+      mFont = mFontFactory.loadFonts(context.openFileInput(filename))[0];
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.out.println("failed to load font " + filename);
+    }
+	}
 	private void initDefaultFont() {
 		try {
 			mFont = mFontFactory.loadFonts(context.getAssets().open(
@@ -89,14 +110,17 @@ public class FontManager {
 		return glyphTable.glyph(glyphOffset, glyphLength);
 	}
 
-	public void changeGlyph(String glyphCharacter, Glyph newGlyph, String nameOfFont)
+	public FontManager changeGlyph(String glyphCharacter, Glyph newGlyph, String nameOfFont)
 			throws IOException {
 		// Iterate through each of the glyphs in the arraylist
 		// and insert each of the new glyphs into the font.
 		// get the glyph table
 		Font.Builder mFontBuilder;
-		mFontBuilder = mFontFactory.loadFontsForBuilding(context.getAssets()
+		if (isDefault)
+			mFontBuilder = mFontFactory.loadFontsForBuilding(context.getAssets()
 				.open("fonts/arial.ttf"))[0];
+		else 
+		  mFontBuilder = mFontFactory.loadFontsForBuilding(context.openFileInput(fileName))[0];
 
 		LocaTable.Builder locaTableBuilder = (LocaTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.loca);
@@ -134,7 +158,7 @@ public class FontManager {
 
 		try {
 			mFontFactory.serializeFont(font, context.openFileOutput(
-					"myFont1.ttf", Context.MODE_WORLD_READABLE));
+					nameOfFont, Context.MODE_WORLD_READABLE));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -142,6 +166,7 @@ public class FontManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return new FontManager(context, nameOfFont);
 	}
 
 	public Glyph makeGlyph(Glyph originalGlyph, List<Stroke> contourList,

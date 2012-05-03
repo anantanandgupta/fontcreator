@@ -5,20 +5,16 @@ import java.io.File;
 import android.content.Context;
 
 public class FontUtils {
-	public static String[] filenameArray;
 
-	public FontUtils() {
-		filenameArray = null;
-
+	private FontUtils() {
 	}
 
 	public static String[] getFonts(Context context) {
-		filenameArray = context.fileList();
-		return filenameArray;
+		return context.fileList();
 	}
 
 	public static boolean hasFont(String name, Context context) {
-		getFonts(context);
+		String[] filenameArray = getFonts(context);
 
 		if (filenameArray != null) {
 			for (int i = 0; i < filenameArray.length; i++) {
