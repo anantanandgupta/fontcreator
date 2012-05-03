@@ -5,16 +5,12 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.http.util.LangUtils;
-
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
-import android.util.Xml.Encoding;
 
 import com.google.typography.font.sfntly.Font;
 import com.google.typography.font.sfntly.Font.PlatformId;
-import com.google.typography.font.sfntly.Font.UnicodeEncodingId;
 import com.google.typography.font.sfntly.Font.WindowsEncodingId;
 import com.google.typography.font.sfntly.FontFactory;
 import com.google.typography.font.sfntly.Tag;
@@ -22,9 +18,12 @@ import com.google.typography.font.sfntly.data.ReadableFontData;
 import com.google.typography.font.sfntly.data.WritableFontData;
 import com.google.typography.font.sfntly.table.core.CMap;
 import com.google.typography.font.sfntly.table.core.CMapTable;
-import com.google.typography.font.sfntly.table.core.NameTable;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapFilter;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapId;
+import com.google.typography.font.sfntly.table.core.NameTable;
+import com.google.typography.font.sfntly.table.core.NameTable.NameEntryBuilder;
+import com.google.typography.font.sfntly.table.core.NameTable.NameId;
+import com.google.typography.font.sfntly.table.core.NameTable.WindowsLanguageId;
 import com.google.typography.font.sfntly.table.truetype.Glyph;
 import com.google.typography.font.sfntly.table.truetype.Glyph.Builder;
 import com.google.typography.font.sfntly.table.truetype.GlyphTable;
@@ -41,6 +40,10 @@ public class FontManager {
 	private String filename;
 
 	private boolean isDefault;
+
+	private final int platID = PlatformId.Windows.value();
+
+	private final int encID = WindowsEncodingId.UnicodeUCS2.value();
 
 	/**
 	 * Constructor
@@ -89,8 +92,8 @@ public class FontManager {
 
 			@Override
 			public boolean accept(CMapId cmapId) {
-				return cmapId.platformId() == PlatformId.Windows.value()
-						&& cmapId.encodingId() == 1;
+				return cmapId.platformId() == platID
+						&& cmapId.encodingId() == encID;
 			}
 		});
 		CMap cMap = iter.next();
@@ -131,6 +134,19 @@ public class FontManager {
 				.getTableBuilder(Tag.loca);
 		GlyphTable.Builder glyphTableBuilder = (GlyphTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.glyf);
+		NameTable.Builder nameBuilder = (NameTable.Builder) mFontBuilder.getTableBuilder(Tag.name);
+		NameEntryBuilder neb =
+		        nameBuilder.nameBuilder(platID, encID,
+		            WindowsLanguageId.English_UnitedStates.value(), NameId.FontFamilyName.value());
+		neb.setName(nameOfFont);
+		neb =
+		        nameBuilder.nameBuilder(platID, encID,
+		            WindowsLanguageId.English_UnitedStates.value(), NameId.FontSubfamilyName.value());
+		neb.setName(nameOfFont);
+		neb =
+		        nameBuilder.nameBuilder(platID, encID,
+		            WindowsLanguageId.English_UnitedStates.value(), NameId.FullFontName.value());
+		neb.setName(nameOfFont);
 
 		List<Integer> originalLocas = locaTableBuilder.locaList();
 		glyphTableBuilder.setLoca(originalLocas);
@@ -158,11 +174,9 @@ public class FontManager {
 		List<Integer> locaList = glyphTableBuilder.generateLocaList();
 		locaTableBuilder.setLocaList(locaList);
 		Font font = mFontBuilder.build();
-
-		Log.v("out font name", nameOfFont);
 		try {
 			mFontFactory.serializeFont(font,
-					context.openFileOutput(nameOfFont, Context.MODE_PRIVATE));
+					context.openFileOutput(nameOfFont, Context.MODE_WORLD_READABLE));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
