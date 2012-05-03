@@ -5,18 +5,24 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.http.util.LangUtils;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
+import android.util.Xml.Encoding;
 
 import com.google.typography.font.sfntly.Font;
 import com.google.typography.font.sfntly.Font.PlatformId;
+import com.google.typography.font.sfntly.Font.UnicodeEncodingId;
+import com.google.typography.font.sfntly.Font.WindowsEncodingId;
 import com.google.typography.font.sfntly.FontFactory;
 import com.google.typography.font.sfntly.Tag;
 import com.google.typography.font.sfntly.data.ReadableFontData;
 import com.google.typography.font.sfntly.data.WritableFontData;
 import com.google.typography.font.sfntly.table.core.CMap;
 import com.google.typography.font.sfntly.table.core.CMapTable;
+import com.google.typography.font.sfntly.table.core.NameTable;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapFilter;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapId;
 import com.google.typography.font.sfntly.table.truetype.Glyph;
@@ -83,7 +89,7 @@ public class FontManager {
 		return glyphTable.glyph(glyphOffset, glyphLength);
 	}
 
-	public void changeGlyph(String glyphCharacter, Glyph newGlyph)
+	public void changeGlyph(String glyphCharacter, Glyph newGlyph, String nameOfFont)
 			throws IOException {
 		// Iterate through each of the glyphs in the arraylist
 		// and insert each of the new glyphs into the font.
@@ -96,6 +102,11 @@ public class FontManager {
 				.getTableBuilder(Tag.loca);
 		GlyphTable.Builder glyphTableBuilder = (GlyphTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.glyf);
+		NameTable.Builder nameTableBuilder = (NameTable.Builder)mFontBuilder.getTableBuilder(Tag.name);
+		NameTable.NameEntryBuilder eb = nameTableBuilder.nameBuilder(PlatformId.Windows.value(), WindowsEncodingId.UnicodeUCS2.value(), 0,4);
+		eb.setName(nameOfFont);
+		Log.v("NameBuilder Changed:", (nameTableBuilder.changed())+"");
+		
 		List<Integer> originalLocas = locaTableBuilder.locaList();
 		glyphTableBuilder.setLoca(originalLocas);
 
