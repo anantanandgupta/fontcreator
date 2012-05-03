@@ -46,6 +46,11 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
+            android:name=".DrawscreenHelpActivity"
+            android:label="Drawscreen Help Activity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
+        <activity
             android:name=".ExportActivity"
             android:label="Export Activity"
             android:screenOrientation="portrait"
