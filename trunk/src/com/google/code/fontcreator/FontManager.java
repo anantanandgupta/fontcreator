@@ -1,7 +1,6 @@
 package com.google.code.fontcreator;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -16,13 +15,10 @@ import com.google.typography.font.sfntly.FontFactory;
 import com.google.typography.font.sfntly.Tag;
 import com.google.typography.font.sfntly.data.ReadableFontData;
 import com.google.typography.font.sfntly.data.WritableFontData;
-import com.google.typography.font.sfntly.table.Header;
 import com.google.typography.font.sfntly.table.core.CMap;
 import com.google.typography.font.sfntly.table.core.CMapTable;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapFilter;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapId;
-import com.google.typography.font.sfntly.table.core.FontHeaderTable;
-import com.google.typography.font.sfntly.table.core.MaximumProfileTable;
 import com.google.typography.font.sfntly.table.truetype.Glyph;
 import com.google.typography.font.sfntly.table.truetype.Glyph.Builder;
 import com.google.typography.font.sfntly.table.truetype.GlyphTable;
@@ -58,10 +54,6 @@ public class FontManager {
 	}
 
 	public int getGlyphId(String glyphCharacter) {
-		// get the glyph table
-		GlyphTable glyphTable = mFont.getTable(Tag.glyf);
-		// get the loca table to get the offsets of each individual glyph
-		LocaTable locaTable = mFont.getTable(Tag.loca);
 		// Get the cMap table from the font
 		CMapTable cMapTable = mFont.getTable(Tag.cmap);
 		Iterator<CMap> iter = cMapTable.iterator(new CMapFilter() {
@@ -110,6 +102,7 @@ public class FontManager {
 		ReadableFontData glyphData = glyphTableBuilder.data();
 		WritableFontData glyphBytes = WritableFontData
 				.createWritableFontData(0);
+		
 		glyphData.copyTo(glyphBytes);
 
 		/*
@@ -129,6 +122,7 @@ public class FontManager {
 		List<Integer> locaList = glyphTableBuilder.generateLocaList();
 		locaTableBuilder.setLocaList(locaList);
 
+		Log.v("GlyphBuilderLength: ", glyphBuilders.size()+"");
 		Font font = mFontBuilder.build();
 
 		try {
@@ -144,11 +138,17 @@ public class FontManager {
 	}
 
 	public Glyph makeGlyph(Glyph originalGlyph, List<Stroke> contourList,
-			int baselineHeight, int baselineWidth) {
+			int baselineHeight, int baselineWidth, int screenWidth) {
 		WritableFontData data = WritableFontData.createWritableFontData(0);
 		int numContours = contourList.size();
 		int offset = 0;
+		
 
+//		HorizontalHeaderTable hheaTable = mFont.getTable(Tag.hhea);
+		
+
+		float scaleFactor = 1300.0f/(screenWidth - baselineWidth);
+		
 		// write the number of contours as int16
 		String tag = "Font";
 		Log.v(tag, "num contours: " + numContours);
@@ -158,8 +158,11 @@ public class FontManager {
 		int xMax = Integer.MIN_VALUE, yMax = Integer.MIN_VALUE, xMin = Integer.MAX_VALUE, yMin = Integer.MAX_VALUE;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				int xcoor = p.x - baselineWidth;
-				int ycoor = baselineHeight - p.y;
+				int xcoor = (int)(scaleFactor*(p.x - baselineWidth));
+				int ycoor = (int)(scaleFactor*(baselineHeight - p.y));
+//				Log.v("X:", xcoor+"");
+//				Log.v("Y: ", ycoor+"");
+						
 
 				if (xcoor > xMax) {
 					xMax = xcoor;
@@ -194,12 +197,12 @@ public class FontManager {
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
 
-		// store end points of each contour
+		// store indices of the end points of each contour
 		int pointIndex = 0;
 		for (Stroke s : contourList) {
 			int endIndex = pointIndex + s.getSegments().size() - 1;
 			b = intToInt16(endIndex);
-			pointIndex = endIndex;
+			pointIndex = endIndex+1;
 			data.writeBytes(offset, b);
 			offset = offset + b.length;
 			Log.v(tag, "end index: " + endIndex);
@@ -228,26 +231,28 @@ public class FontManager {
 				offset++;
 				isOnCurve = !isOnCurve;
 			}
+			isOnCurve = true;
 		}
 
 		int last = 0;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				b = intToInt16(p.x - baselineWidth - last);
+				b = intToInt16((int)(scaleFactor*(p.x - baselineWidth)) - last);
+				Log.v("Xrel:", ((int)(scaleFactor*(p.x - baselineWidth)) - last)+"");
 				data.writeBytes(offset, b);
 				offset = offset + b.length;
-				last = p.x - baselineWidth;
-
+				last = (int)(scaleFactor*(p.x - baselineWidth));
 			}
 		}
 		last = 0;
+		
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				b = intToInt16(baselineHeight - p.y - last);
+				b = intToInt16((int)(scaleFactor*(baselineHeight - p.y)) - last);
+				Log.v("Yrel:", ((int)(scaleFactor*(baselineHeight - p.y)) - last)+"");
 				data.writeBytes(offset, b);
 				offset = offset + b.length;
-				last = baselineHeight - p.y;
-
+				last = (int)(scaleFactor*(baselineHeight - p.y));
 			}
 		}
 
