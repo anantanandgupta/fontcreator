@@ -29,6 +29,7 @@ import com.google.typography.font.sfntly.table.truetype.SimpleGlyph;
 
 public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private TutorialThread drawingThread;
+	private boolean needSave;
 	private List<Stroke> pathList, redoHistory, contourList,
 			contourRedoHistory;
 	private boolean initialDrawPress = false, editingControlPoint = false,
@@ -534,6 +535,16 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public boolean needSave()
+	{
+		return needSave;
+	}
+	
+	public void setNeedSave(boolean ns)
+	{
+		needSave = ns;
 	}
 
 	public DrawActivity.DrawingTools getCurrentTool() {
