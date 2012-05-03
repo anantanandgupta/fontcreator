@@ -28,7 +28,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 	undoButton, redoButton;
 	private Button currentLetterDisplayButton, prevButton, saveButton,
 	nextButton;
-	
+
 	private FontManager fontManager;
 
 	private DrawPanel drawPanel;
@@ -74,13 +74,13 @@ public class DrawActivity extends Activity implements OnClickListener {
 		ai = new AlphabetIterator();
 		fontManager = new FontManager(this);
 		updateToolHighlight();
-        ViewTreeObserver vto = drawPanel.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                drawPanel.loadGlyph(ai.getCurrent(), fontManager);
-            }
-        });
+		ViewTreeObserver vto = drawPanel.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				drawPanel.loadGlyph(ai.getCurrent(), fontManager);
+			}
+		});
 	}
 
 	@Override
@@ -174,18 +174,30 @@ public class DrawActivity extends Activity implements OnClickListener {
 			break;
 		case R.id.prevButton:
 			ai.prev();
-			saveGlyphDialog(-1);
+			if(drawPanel.needSave())
+				saveGlyphDialog(-1);
+			else {
+				drawPanel.clear();
+				drawPanel.loadGlyph(ai.getCurrent(), fontManager);
+				currentLetterDisplayButton.setText(ai.getCurrent());
+			}
 			break;
 		case R.id.saveButton:
 			saveGlyphDialog(0);
 			break;
 		case R.id.nextButton:
 			ai.next();
-			saveGlyphDialog(1);
+			if(drawPanel.needSave())
+				saveGlyphDialog(1);
+			else {
+				drawPanel.clear();
+				drawPanel.loadGlyph(ai.getCurrent(), fontManager);
+				currentLetterDisplayButton.setText(ai.getCurrent());
+			}
 			break;
 		}
 	}
-	
+
 	@Override
 	protected void onPostResume() {
 		super.onResume();
@@ -224,13 +236,13 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 		Button noButton = (Button)dialogView.findViewById(R.id.dont_save_glyph_button);
 		noButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				viewDialog.cancel();				
 			}
 		});
-		
+
 		Button saveButton = (Button)dialogView.findViewById(R.id.save_glyph_button);
 		saveButton.setOnClickListener(new OnClickListener() {
 

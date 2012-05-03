@@ -29,7 +29,7 @@ import com.google.typography.font.sfntly.table.truetype.SimpleGlyph;
 
 public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private TutorialThread drawingThread;
-	private boolean needSave;
+	private boolean needSave = false;
 	private List<Stroke> pathList, redoHistory, contourList,
 			contourRedoHistory;
 	private boolean initialDrawPress = false, editingControlPoint = false,
@@ -394,7 +394,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void onDraw(Canvas canvas) {
-		setNeedSave(true);
 		canvas.drawColor(Color.WHITE);
 		synchronized (contourList) {
 			Path p = new Path();
