@@ -78,7 +78,7 @@ public static void email(Context context, String emailTo, String emailCC,
 	    String subject, String emailText, String strFile)
 	{
 	    
-	    final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+	    Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 	    emailIntent.setType("text/plain");
 	    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, 
 	        new String[]{emailTo});
