@@ -6,6 +6,10 @@ public class AlphabetIterator{
 	public AlphabetIterator(){
 		current = 0;
 	}
+	
+	public String[] getList() {
+		return alphabet;
+	}
 
 	public String next(){
 		if(current<alphabet.length-1)

@@ -10,21 +10,32 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class DisplayActivity extends Activity{
-	private TextView fontDisplayTextView;
+	private TextView fontDisplayTextView, fontNameDisplay;
 	private Button mainMenuButton;
+	private String fontName;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.displayfont);
+		if (getIntent().getExtras().containsKey(FontDefaults.FILENAMEKEY))
+			fontName = getIntent().getExtras().getString(FontDefaults.FILENAMEKEY);
+		else 
+			fontName = FontDefaults.DEFAULTFILENAME;
 		initFontDisplay();
 		initButtons();
 	}
 	
 	private void initFontDisplay(){
+		fontNameDisplay = (TextView) findViewById(R.id.fontNameTextView);
+		fontNameDisplay.setText(fontName);
 		fontDisplayTextView = (TextView) findViewById(R.id.fontDisplayTextView);
-		fontDisplayTextView.setText(getString(R.string.UCLetters)
-				+"\n" +getString(R.string.LCLetters)+ "\n" + getString(R.string.symbols));
+		StringBuilder sb = new StringBuilder();
+		for (String s : new AlphabetIterator().getList()) {
+			sb.append(s).append(" ");
+		}
+		fontDisplayTextView.setText(sb.toString());
+		fontDisplayTextView.setTypeface(FontUtils.getTypeface(this, fontName));
 	}
 	
 	private void initButtons() {

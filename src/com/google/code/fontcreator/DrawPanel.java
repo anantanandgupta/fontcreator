@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -85,7 +86,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		setFocusable(true);
 		setZOrderOnTop(true);
 	}
-
+	
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		setNeedSave(true);
@@ -279,7 +281,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void finalizeContour() {
-		setNeedSave(true);
 		/*Path contour = new Path();
 		contour.moveTo(contourStart.x, contourStart.y);
 		Point start, mid, end;*/
@@ -319,24 +320,21 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	public void loadGlyph(String newGlyph, FontManager fm) {
+		needSave = false;
 		Stroke currContour = new Stroke(continuousPaint);
 		SimpleGlyph glyph = (SimpleGlyph) fm.getGlyph(newGlyph);
 		int width = getWidth();
 		int height = getHeight();
 		int baselineHeight = (int)(height * 3f/4f);
 		int baselineWidth = (int)(width * 1f/5f);
-		float scaleFactor = (width - baselineWidth)/1300.0f;
-		
-		Log.v("scale factor", scaleFactor+"");
+		float scaleFactor = (width - baselineWidth)/1500.0f;
 	    
 	    Point control = new Point(), current = new Point();
 	    for (int i = 0; i < glyph.numberOfContours(); i++) {
 	    	for (int j = 0; j < glyph.numberOfPoints(i); j++) {
 	    		int xScaled = (int)(scaleFactor * glyph.xCoordinate(i, j)) + baselineWidth;
 	    		int yScaled = -1 * (int)(scaleFactor * glyph.yCoordinate(i, j)) + baselineHeight;
-	    		
 	    		current.set(xScaled, yScaled);
-	    		Log.v("Adding point to contour: ", current.toString());
 	    		if (glyph.onCurve(i, j)) {
 	    			if (j == 0) {
 	    				currContour.start(current);
@@ -362,7 +360,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	    	}
 	    	currContour.close();
 	    	contourList.add(currContour);
-	    	Log.v("Contour", "adding to contour list");
 	    	currContour = new Stroke(contourPaint);
 	    }
 	}
@@ -439,8 +436,19 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		drawingThread.setRunning(true);
-		drawingThread.start();
+		
+		try {
+			setFocusable(true);
+			setZOrderOnTop(true);
+			drawingThread.setRunning(true);
+			drawingThread.start();
+		} catch (Exception ex) {
+			drawingThread = new TutorialThread(getHolder(), this);
+			drawingThread.setRunning(true);
+			setFocusable(true);
+			setZOrderOnTop(true);
+			drawingThread.start();
+		}
 	}
 
 	@Override
@@ -467,6 +475,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 			if (pathList.size() > 0){
 				Stroke s = pathList.remove(pathList.size() - 1);
 				if (pathList.size() != 0) {
+					setNeedSave(true);
 					lastContourEnd = s.getStart();
 				}
 				else {
@@ -480,8 +489,10 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if (undoPath) {
 			synchronized (contourList) {
-				if (contourList.size() > 0) 
+				if (contourList.size() > 0) {
+					setNeedSave(true);
 					contourRedoHistory.add(contourList.remove(contourList.size()-1));
+				}
 			}
 		}
 	}
@@ -530,15 +541,16 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	public FontManager save(String letter, FontManager fm, String fontName) {
+	public FontManager save(String letter, FontManager fm, String fontName) throws IOException {
+		
 		Glyph f = fm .makeGlyph(fm.getGlyph(letter), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f), getWidth());
-		try {
-			return fm.changeGlyph(letter, f, fontName);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+		needSave = false;
+		return fm.changeGlyph(letter, f, fontName);
+		
+
 	}
+	
+	
 	
 	public boolean needSave()
 	{
@@ -547,6 +559,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	
 	public void setNeedSave(boolean ns)
 	{
+		//Log.v("NEEDSAVE", "Need save set " + ns);
 		needSave = ns;
 	}
 

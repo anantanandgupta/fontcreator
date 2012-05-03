@@ -69,5 +69,16 @@
         android:background="@drawable/button"
         android:text="@string/use_font"
         android:textColor="@color/white1" />
+    
+    <Button
+        android:id="@+id/delete_button"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/use_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button"
+        android:text="@string/delete_font"
+        android:textColor="@color/white1" />
 
 </RelativeLayout>

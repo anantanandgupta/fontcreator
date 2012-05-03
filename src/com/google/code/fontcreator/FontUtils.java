@@ -3,6 +3,7 @@ package com.google.code.fontcreator;
 import java.io.File;
 
 import android.content.Context;
+import android.graphics.Typeface;
 
 public class FontUtils {
 
@@ -11,6 +12,10 @@ public class FontUtils {
 
 	public static String[] getFonts(Context context) {
 		return context.fileList();
+	}
+	
+	public static Typeface getTypeface(Context context, String filename) {
+		return Typeface.createFromFile(context.getFileStreamPath(filename));
 	}
 
 	public static boolean hasFont(String name, Context context) {
