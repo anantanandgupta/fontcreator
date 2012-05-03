@@ -88,6 +88,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		setNeedSave(true);
 		synchronized (drawingThread.getSurfaceHolder()) {
 			switch (currentTool) {
 			case straightLine:
@@ -278,6 +279,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void finalizeContour() {
+		setNeedSave(true);
 		/*Path contour = new Path();
 		contour.moveTo(contourStart.x, contourStart.y);
 		Point start, mid, end;*/
@@ -373,6 +375,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 							public void onClick(DialogInterface dialog,
 									int id) {
 								clear();
+								setNeedSave(true);
 							}
 						})
 				.setNegativeButton("No",
@@ -391,6 +394,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void onDraw(Canvas canvas) {
+		setNeedSave(true);
 		canvas.drawColor(Color.WHITE);
 		synchronized (contourList) {
 			Path p = new Path();
