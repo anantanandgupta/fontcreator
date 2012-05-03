@@ -23,7 +23,6 @@ public class ExportActivity extends Activity{
 	private Button sendButton;
 	private EditText emailField; 
 	private Spinner exportSpinner;
-	private Context context;
 	
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +31,9 @@ public class ExportActivity extends Activity{
 			sendButton = (Button) findViewById(R.id.exportsendbutton);
 			emailField = (EditText) findViewById(R.id.exportemailaddressbox);
 			exportSpinner = (Spinner) findViewById(R.id.exportspinner);
-			final String fontFiles[] = FontUtils.getFonts(context);
+			final String fontFiles[] = FontUtils.getFonts(this);
 			
-			ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, fontFiles);
+			ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, fontFiles);
 			spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
 			exportSpinner.setAdapter(spinnerArrayAdapter);
 			
@@ -57,13 +56,11 @@ public class ExportActivity extends Activity{
 					attachment = exportSpinner.getSelectedItem().toString();
 					
 					String attachmentPath = "";
-					attachmentPath = (FontUtils.getFont(attachment, context)).getAbsolutePath();
-					
-					filePaths.add(attachmentPath);
+					attachmentPath = (FontUtils.getFont(attachment, view.getContext())).getAbsolutePath();
 					
 					
 					
-					email(context, emailTo, emailCC, subject, emailText, filePaths);
+					email(view.getContext(), emailTo, emailCC, subject, emailText, attachmentPath);
 					
 										
 					
@@ -78,10 +75,10 @@ public class ExportActivity extends Activity{
 
 		
 public static void email(Context context, String emailTo, String emailCC,
-	    String subject, String emailText, List<String> filePaths)
+	    String subject, String emailText, /*List<String> filePaths */ String strFile)
 	{
 	    //need to "send multiple" to get more than one attachment
-	    final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
+	    final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 	    emailIntent.setType("text/plain");
 	    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, 
 	        new String[]{emailTo});
@@ -89,7 +86,13 @@ public static void email(Context context, String emailTo, String emailCC,
 	        new String[]{emailCC});
 	    emailIntent.putExtra(Intent.EXTRA_SUBJECT, new String[]{subject});
 		emailIntent.putExtra(Intent.EXTRA_TEXT, new String[]{emailText});
-	    //has to be an ArrayList
+	    
+		emailIntent.putExtra(Intent.EXTRA_STREAM,
+				Uri.parse("file://" + strFile));
+		
+		//emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailText);
+		/*
+		//has to be an ArrayList
 	    ArrayList<Uri> uris = new ArrayList<Uri>();
 	    //convert from paths to Android friendly Parcelable Uri's
 	    for (String file : filePaths)
@@ -98,7 +101,8 @@ public static void email(Context context, String emailTo, String emailCC,
 	        Uri u = Uri.fromFile(fileIn);
 	        uris.add(u);
 	    }
-	    emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+	    */
+	   // emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 	    context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
 	}
 }
