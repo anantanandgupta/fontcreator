@@ -20,10 +20,12 @@ import com.google.typography.font.sfntly.table.core.CMap;
 import com.google.typography.font.sfntly.table.core.CMapTable;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapFilter;
 import com.google.typography.font.sfntly.table.core.CMapTable.CMapId;
+
 import com.google.typography.font.sfntly.table.core.NameTable;
 import com.google.typography.font.sfntly.table.core.NameTable.NameEntryBuilder;
 import com.google.typography.font.sfntly.table.core.NameTable.NameId;
 import com.google.typography.font.sfntly.table.core.NameTable.WindowsLanguageId;
+
 import com.google.typography.font.sfntly.table.truetype.Glyph;
 import com.google.typography.font.sfntly.table.truetype.Glyph.Builder;
 import com.google.typography.font.sfntly.table.truetype.GlyphTable;
@@ -135,7 +137,7 @@ public class FontManager {
 		GlyphTable.Builder glyphTableBuilder = (GlyphTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.glyf);
 		NameTable.Builder nameBuilder = (NameTable.Builder) mFontBuilder.getTableBuilder(Tag.name);
-		NameEntryBuilder neb =
+		NameEntryBuilder neb =/*
 		        nameBuilder.nameBuilder(platID, encID,
 		            WindowsLanguageId.English_UnitedStates.value(), NameId.FontFamilyName.value());
 		neb.setName(nameOfFont);
@@ -143,9 +145,9 @@ public class FontManager {
 		        nameBuilder.nameBuilder(platID, encID,
 		            WindowsLanguageId.English_UnitedStates.value(), NameId.FontSubfamilyName.value());
 		neb.setName(nameOfFont);
-		neb =
+		neb =*/
 		        nameBuilder.nameBuilder(platID, encID,
-		            WindowsLanguageId.English_UnitedStates.value(), NameId.FullFontName.value());
+		            WindowsLanguageId.English_UnitedStates.value(), NameId.FontFamilyName.value());
 		neb.setName(nameOfFont);
 
 		List<Integer> originalLocas = locaTableBuilder.locaList();
@@ -205,9 +207,9 @@ public class FontManager {
 		int xMax = Integer.MIN_VALUE, yMax = Integer.MIN_VALUE, xMin = Integer.MAX_VALUE, yMin = Integer.MAX_VALUE;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
+
 				int xcoor = (int) (scaleFactor * (p.x - baselineWidth));
 				int ycoor = (int) (scaleFactor * (baselineHeight - p.y));
-
 				if (xcoor > xMax) {
 					xMax = xcoor;
 				}
