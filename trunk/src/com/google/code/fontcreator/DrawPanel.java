@@ -25,6 +25,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.google.typography.font.sfntly.table.truetype.Glyph;
+import com.google.typography.font.sfntly.table.truetype.SimpleGlyph;
 
 public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private TutorialThread drawingThread;
@@ -36,9 +37,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private Point startPoint = null, controlPointHandle = null,
 			endPoint = null, lastContourEnd = null, contourStart = null;
 	private Stroke currentPath;
-	private Path erasePath;
 	private Paint blackPaint = null, drawPathPaint = null, continuousPaint = null, contourPaint = null;
-	private int lastDownX, lastDownY, lastContX, lastContY;
+	private int lastDownX, lastDownY;
 	private DrawActivity.DrawingTools currentTool;
 
 	public DrawPanel(Context context, AttributeSet attribs) {
@@ -217,8 +217,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 								(int) event.getY());
 						currentPath = new Stroke(continuousPaint);
 						currentPath.start(startPoint);
-						lastContX = startPoint.x;
-						lastContY = startPoint.y;
 						drawingContinuous = true;
 						contourStart = startPoint;
 						inContour = true;
@@ -227,8 +225,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 						startPoint = lastContourEnd;
 						currentPath = new Stroke(continuousPaint);
 						currentPath.start(startPoint);
-						lastContX = startPoint.x;
-						lastContY = startPoint.y;
 						drawingContinuous = true;
 					}
 				} else if (drawingContinuous
@@ -249,8 +245,6 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 						&& event.getAction() == MotionEvent.ACTION_MOVE) {
 					Point curr = new Point((int) event.getX(), (int) event.getY());
 					currentPath.addQuad(curr, curr);
-					lastContX = (int) event.getX();
-					lastContY = (int) event.getY();
 				} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 					currentPath = null;
 					drawingContinuous = false;
@@ -319,6 +313,55 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		lastContourEnd = null;
 		clearRedoHistory();
 
+	}
+	
+	public void loadGlyph(String newGlyph, FontManager fm) {
+		Stroke currContour = new Stroke(continuousPaint);
+		SimpleGlyph glyph = (SimpleGlyph) fm.getGlyph(newGlyph);
+		int width = getWidth();
+		int height = getHeight();
+		int baselineHeight = (int)(height * 3f/4f);
+		int baselineWidth = (int)(width * 1f/5f);
+		float scaleFactor = (width - baselineWidth)/1300.0f;
+		
+		Log.v("scale factor", scaleFactor+"");
+	    
+	    Point control = new Point(), current = new Point();
+	    for (int i = 0; i < glyph.numberOfContours(); i++) {
+	    	for (int j = 0; j < glyph.numberOfPoints(i); j++) {
+	    		int xScaled = (int)(scaleFactor * glyph.xCoordinate(i, j)) + baselineWidth;
+	    		int yScaled = -1 * (int)(scaleFactor * glyph.yCoordinate(i, j)) + baselineHeight;
+	    		
+	    		current.set(xScaled, yScaled);
+	    		Log.v("Adding point to contour: ", current.toString());
+	    		if (glyph.onCurve(i, j)) {
+	    			if (j == 0) {
+	    				currContour.start(current);
+	    				control = null;
+	    			}
+	    			else if (control == null) {
+	    				currContour.addQuad(current, current);
+	    			}
+	    			else {
+	    				currContour.addQuad(control, current);
+	    				control = null;
+	    			}
+	    		}
+	    		else {
+	    			if (control == null) {
+	    				control = new Point(xScaled, yScaled);
+	    			} 
+	    			else {
+	    				currContour.addQuad(control, current);
+	    				control.set(xScaled, yScaled);
+	    			}
+	    		}
+	    	}
+	    	currContour.close();
+	    	contourList.add(currContour);
+	    	Log.v("Contour", "adding to contour list");
+	    	currContour = new Stroke(contourPaint);
+	    }
 	}
 	
 	public void checkClear() {
@@ -483,9 +526,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	public void save() {
-		FontManager fm = new FontManager(getContext());
-		String letter = "i";
+	public void save(String letter, FontManager fm) {
 		Glyph f = fm .makeGlyph(fm.getGlyph(letter), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f), getWidth());
 		try {
 			fm.changeGlyph(letter, f, "Name");

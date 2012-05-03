@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +14,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,6 +28,8 @@ public class DrawActivity extends Activity implements OnClickListener {
 	undoButton, redoButton;
 	private Button currentLetterDisplayButton, prevButton, saveButton,
 	nextButton;
+	
+	private FontManager fontManager;
 
 	private DrawPanel drawPanel;
 
@@ -67,7 +72,15 @@ public class DrawActivity extends Activity implements OnClickListener {
 		drawPanel.setCurrentTool(DrawingTools.straightLine);
 		//fontManager = new FontManager();
 		ai = new AlphabetIterator();
+		fontManager = new FontManager(this);
 		updateToolHighlight();
+        ViewTreeObserver vto = drawPanel.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                drawPanel.loadGlyph(ai.getCurrent(), fontManager);
+            }
+        });
 	}
 
 	@Override
@@ -172,6 +185,12 @@ public class DrawActivity extends Activity implements OnClickListener {
 			break;
 		}
 	}
+	
+	@Override
+	protected void onPostResume() {
+		super.onResume();
+		drawPanel.loadGlyph(ai.getCurrent(), fontManager);
+	}
 
 	private void updateToolHighlight() {
 		straightLineToolButton.setBackgroundResource(R.color.transparent);
@@ -217,7 +236,8 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View view) {
-				drawPanel.save();
+				drawPanel.save(ai.getCurrent(), fontManager);
+				drawPanel.clear();
 				Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
 				toast.show();
 				viewDialog.cancel();
