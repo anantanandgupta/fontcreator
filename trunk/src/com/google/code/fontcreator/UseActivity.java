@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,17 +17,23 @@ public class UseActivity extends Activity {
 	private Spinner fontSpinner;
 	
 	private EditText noteEditText;
-
-	private Button sendButton;
+	
 	private Button clearButton;
+	
+	private String fontName;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.usefont);
+		if (getIntent().getExtras().containsKey(FontDefaults.FILENAMEKEY))
+			fontName = getIntent().getExtras().getString(FontDefaults.FILENAMEKEY);
+		else 
+			fontName = FontDefaults.DEFAULTFILENAME;
 		initFontSpinner();
 		initEditText();
 		initButtons();
+		setFont();
 	}
 	
 	/**
@@ -33,11 +41,31 @@ public class UseActivity extends Activity {
 	 */
 	private void initFontSpinner(){
 		fontSpinner = (Spinner) findViewById(R.id.chooseFontSpinner);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-				this, R.array.fonts,
-				android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		fontSpinner.setAdapter(adapter);
+		final String fontFiles[] = FontUtils.getFonts(this);
+		int i;
+		for (i = 0 ; i < fontFiles.length; i++) {
+			if (fontFiles[i].equalsIgnoreCase(fontName)) {
+				break;
+			}
+		}
+		ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, fontFiles);
+		spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
+		fontSpinner.setAdapter(spinnerArrayAdapter);
+		fontSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				fontName = (String)arg0.getItemAtPosition(arg2);
+				setFont();
+			}
+
+			
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {}
+		});
+		fontSpinner.setSelection(i);
 	}
 	/**
 	 * Initialize the EditText that lets user write the note
@@ -46,19 +74,17 @@ public class UseActivity extends Activity {
 		noteEditText = (EditText) findViewById(R.id.noteEditText);
 	}
 	
+	private void setFont() {
+		noteEditText.setTypeface(FontUtils.getTypeface(this, fontName));
+	}
+	
 	private void initButtons() {
 		// create the buttons
-		sendButton = (Button) findViewById(R.id.sendButton);
+		
 		clearButton = (Button) findViewById(R.id.clearButton);
 
 		// listeners for the buttons
-		sendButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View view) {
-				Intent intent = new Intent(UseActivity.this, SendActivity.class);
-	        	startActivity(intent);
-			}
 
-		});
 		
 		clearButton.setOnClickListener(new View.OnClickListener() {
 			//clears the edit text

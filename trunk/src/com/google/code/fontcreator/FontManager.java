@@ -37,9 +37,9 @@ public class FontManager {
 	private FontFactory mFontFactory;
 	// Font builder
 	private Context context;
-	
-	private String fileName;
-	
+
+	private String filename;
+
 	private boolean isDefault;
 
 	/**
@@ -49,25 +49,27 @@ public class FontManager {
 		this.context = context;
 		mFontFactory = FontFactory.getInstance();
 		initDefaultFont();
-		fileName = "";
+		filename = "";
 		isDefault = true;
 	}
-	
+
 	public FontManager(Context context, String filename) {
-	  this.context = context;
-    mFontFactory = FontFactory.getInstance();
-    initFont(filename);
-    isDefault = false;
+		this.context = context;
+		this.filename = filename;
+		mFontFactory = FontFactory.getInstance();
+		initFont(filename);
+		isDefault = false;
 	}
 
 	private void initFont(String filename) {
-	  try {
-      mFont = mFontFactory.loadFonts(context.openFileInput(filename))[0];
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.out.println("failed to load font " + filename);
-    }
+		try {
+			mFont = mFontFactory.loadFonts(context.openFileInput(filename))[0];
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("failed to load font " + filename);
+		}
 	}
+
 	private void initDefaultFont() {
 		try {
 			mFont = mFontFactory.loadFonts(context.getAssets().open(
@@ -110,30 +112,33 @@ public class FontManager {
 		return glyphTable.glyph(glyphOffset, glyphLength);
 	}
 
-	public FontManager changeGlyph(String glyphCharacter, Glyph newGlyph, String nameOfFont)
-			throws IOException {
+	public FontManager changeGlyph(String glyphCharacter, Glyph newGlyph,
+			String nameOfFont) throws IOException {
 		// Iterate through each of the glyphs in the arraylist
 		// and insert each of the new glyphs into the font.
 		// get the glyph table
 		Font.Builder mFontBuilder;
+
+		Log.v("font name", nameOfFont);
 		if (isDefault)
-			mFontBuilder = mFontFactory.loadFontsForBuilding(context.getAssets()
-				.open("fonts/arial.ttf"))[0];
-		else 
-		  mFontBuilder = mFontFactory.loadFontsForBuilding(context.openFileInput(fileName))[0];
+			mFontBuilder = mFontFactory.loadFontsForBuilding(context
+					.getAssets().open("fonts/arial.ttf"))[0];
+		else
+			mFontBuilder = mFontFactory.loadFontsForBuilding(context
+					.openFileInput(filename))[0];
 
 		LocaTable.Builder locaTableBuilder = (LocaTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.loca);
 		GlyphTable.Builder glyphTableBuilder = (GlyphTable.Builder) mFontBuilder
 				.getTableBuilder(Tag.glyf);
-		
+
 		List<Integer> originalLocas = locaTableBuilder.locaList();
 		glyphTableBuilder.setLoca(originalLocas);
 
 		ReadableFontData glyphData = glyphTableBuilder.data();
 		WritableFontData glyphBytes = WritableFontData
 				.createWritableFontData(0);
-		
+
 		glyphData.copyTo(glyphBytes);
 
 		/*
@@ -152,13 +157,12 @@ public class FontManager {
 		glyphBuilder.setData(newGlyph.readFontData());
 		List<Integer> locaList = glyphTableBuilder.generateLocaList();
 		locaTableBuilder.setLocaList(locaList);
-
-		Log.v("GlyphBuilderLength: ", glyphBuilders.size()+"");
 		Font font = mFontBuilder.build();
 
+		Log.v("out font name", nameOfFont);
 		try {
-			mFontFactory.serializeFont(font, context.openFileOutput(
-					nameOfFont, Context.MODE_WORLD_READABLE));
+			mFontFactory.serializeFont(font,
+					context.openFileOutput(nameOfFont, Context.MODE_PRIVATE));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -174,27 +178,21 @@ public class FontManager {
 		WritableFontData data = WritableFontData.createWritableFontData(0);
 		int numContours = contourList.size();
 		int offset = 0;
-		
 
-//		HorizontalHeaderTable hheaTable = mFont.getTable(Tag.hhea);
-		
+		// HorizontalHeaderTable hheaTable = mFont.getTable(Tag.hhea);
 
-		float scaleFactor = 1300.0f/(screenWidth - baselineWidth);
-		
+		float scaleFactor = 1500.0f / (screenWidth - baselineWidth);
+
 		// write the number of contours as int16
 		String tag = "Font";
-		Log.v(tag, "num contours: " + numContours);
 		byte[] b = intToInt16(numContours);
 		data.writeBytes(0, b);
 		offset = offset + b.length;
 		int xMax = Integer.MIN_VALUE, yMax = Integer.MIN_VALUE, xMin = Integer.MAX_VALUE, yMin = Integer.MAX_VALUE;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				int xcoor = (int)(scaleFactor*(p.x - baselineWidth));
-				int ycoor = (int)(scaleFactor*(baselineHeight - p.y));
-//				Log.v("X:", xcoor+"");
-//				Log.v("Y: ", ycoor+"");
-						
+				int xcoor = (int) (scaleFactor * (p.x - baselineWidth));
+				int ycoor = (int) (scaleFactor * (baselineHeight - p.y));
 
 				if (xcoor > xMax) {
 					xMax = xcoor;
@@ -211,20 +209,16 @@ public class FontManager {
 			}
 		}
 
-		Log.v(tag, "xMin: " + xMin);
 		// write xmin, ymin, xmax, ymax
 		b = intToInt16(xMin);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
-		Log.v(tag, "yMin: " + yMin);
 		b = intToInt16(yMin);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
-		Log.v(tag, "xMax: " + xMax);
 		b = intToInt16(xMax);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
-		Log.v(tag, "yMax: " + yMax);
 		b = intToInt16(yMax);
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
@@ -234,10 +228,9 @@ public class FontManager {
 		for (Stroke s : contourList) {
 			int endIndex = pointIndex + s.getSegments().size() - 1;
 			b = intToInt16(endIndex);
-			pointIndex = endIndex+1;
+			pointIndex = endIndex + 1;
 			data.writeBytes(offset, b);
 			offset = offset + b.length;
-			Log.v(tag, "end index: " + endIndex);
 		}
 		/*
 		 * int instrSize = originalGlyph.instructionSize(); ReadableFontData
@@ -269,22 +262,22 @@ public class FontManager {
 		int last = 0;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				b = intToInt16((int)(scaleFactor*(p.x - baselineWidth)) - last);
-				Log.v("Xrel:", ((int)(scaleFactor*(p.x - baselineWidth)) - last)+"");
+				b = intToInt16((int) (scaleFactor * (p.x - baselineWidth))
+						- last);
 				data.writeBytes(offset, b);
 				offset = offset + b.length;
-				last = (int)(scaleFactor*(p.x - baselineWidth));
+				last = (int) (scaleFactor * (p.x - baselineWidth));
 			}
 		}
 		last = 0;
-		
+
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
-				b = intToInt16((int)(scaleFactor*(baselineHeight - p.y)) - last);
-				Log.v("Yrel:", ((int)(scaleFactor*(baselineHeight - p.y)) - last)+"");
+				b = intToInt16((int) (scaleFactor * (baselineHeight - p.y))
+						- last);
 				data.writeBytes(offset, b);
 				offset = offset + b.length;
-				last = (int)(scaleFactor*(baselineHeight - p.y));
+				last = (int) (scaleFactor * (baselineHeight - p.y));
 			}
 		}
 

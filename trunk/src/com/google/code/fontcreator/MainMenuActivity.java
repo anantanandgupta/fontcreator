@@ -14,105 +14,144 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class MainMenuActivity extends Activity{
+public class MainMenuActivity extends Activity {
 
 	public static final String FILENAMEKEY = "FILENAME.KEY";
+
 	@Override
-	protected void onCreate(Bundle savedInstanceState){
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mainmenu);
-		final Button newFontButton = (Button)findViewById(R.id.new_font_button);
+		final Button newFontButton = (Button) findViewById(R.id.new_font_button);
 		newFontButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				
+
 				final AlertDialog viewDialog;
-				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-			
-				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
-				View dialogView = li.inflate(R.layout.new_font_name_dialog, null); 
-				
+				AlertDialog.Builder builder = new AlertDialog.Builder(v
+						.getContext());
+
+				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View dialogView = li.inflate(R.layout.new_font_name_dialog,
+						null);
+
 				builder.setView(dialogView);
 				viewDialog = builder.create();
-				
-				final EditText editText = (EditText)dialogView.findViewById(R.id.name_new_font_editText);
-				
-				final Button okButton = (Button)dialogView.findViewById(R.id.name_ok_button);
+
+				final EditText editText = (EditText) dialogView
+						.findViewById(R.id.name_new_font_editText);
+
+				final Button okButton = (Button) dialogView
+						.findViewById(R.id.name_ok_button);
 				okButton.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View view) {
+
 						String fontName = editText.getText().toString();
-						Toast t = Toast.makeText(getApplicationContext(), "Name is " + fontName, Toast.LENGTH_LONG);
+						if (!fontName.toLowerCase().endsWith(".ttf"))
+							;
+						fontName += ".ttf";
+						Toast t = Toast.makeText(getApplicationContext(),
+								"Name is " + fontName, Toast.LENGTH_LONG);
 						t.show();
-						if (!fontName.toLowerCase().endsWith(".ttf"));
-							fontName += ".ttf";
-						Intent myIntent = new Intent(view.getContext(), DrawActivity.class);
+						Intent myIntent = new Intent(view.getContext(),
+								DrawActivity.class);
 						myIntent.putExtra(FILENAMEKEY, fontName);
-		                startActivity(myIntent);
+						viewDialog.dismiss();
+						startActivity(myIntent);
 					}
 				});
-				final Button cancelButton = (Button)dialogView.findViewById(R.id.name_cancel_button);
+				final Button cancelButton = (Button) dialogView
+						.findViewById(R.id.name_cancel_button);
 				cancelButton.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
-						viewDialog.cancel();
+						viewDialog.dismiss();
 					}
 				});
-				
+
 				viewDialog.show();
 			}
 		});
-		final Button existingFontButton = (Button)findViewById(R.id.existing_font_button);
+		final Button existingFontButton = (Button) findViewById(R.id.existing_font_button);
 		existingFontButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				final AlertDialog viewDialog;
-				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-			
-				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
-				View dialogView = li.inflate(R.layout.existingfontdialogue, null); 
-				
+				AlertDialog.Builder builder = new AlertDialog.Builder(v
+						.getContext());
+
+				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View dialogView = li.inflate(R.layout.existingfontdialogue,
+						null);
+
 				builder.setView(dialogView);
 				viewDialog = builder.create();
-				
-				Spinner spinner = (Spinner) dialogView.findViewById(R.id.chooseExistingFontSpinner); 
-				ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(v.getContext(), R.array.fonts, android.R.layout.simple_spinner_item); 
-				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); 
-				spinner.setAdapter(adapter); 
-				
-				final Button okButton = (Button)dialogView.findViewById(R.id.ok_button);
+
+				final Spinner spinner = (Spinner) dialogView
+						.findViewById(R.id.chooseExistingFontSpinner);
+				/*
+				 * ArrayAdapter<CharSequence> adapter =
+				 * ArrayAdapter.createFromResource(v.getContext(),
+				 * R.array.fonts, android.R.layout.simple_spinner_item);
+				 * adapter.setDropDownViewResource(android.R.layout.
+				 * simple_spinner_dropdown_item); spinner.setAdapter(adapter);
+				 */
+				final String fontFiles[] = FontUtils.getFonts(v.getContext());
+
+				ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+						v.getContext(), android.R.layout.simple_spinner_item,
+						fontFiles);
+				spinnerArrayAdapter
+						.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The
+																									// drop
+																									// down
+																									// view
+				spinner.setAdapter(spinnerArrayAdapter);
+
+				final Button okButton = (Button) dialogView
+						.findViewById(R.id.ok_button);
 				okButton.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
-						Intent myIntent = new Intent(v.getContext(), ManageFontActivity.class);
-		                startActivity(myIntent);	
-		                //Will put code for specific font?
+						if (spinner.getSelectedItem() != null) {
+							String filename = spinner.getSelectedItem()
+									.toString();
+							Intent myIntent = new Intent(v.getContext(),
+									ManageFontActivity.class);
+							myIntent.putExtra(FontDefaults.FILENAMEKEY,
+									filename);
+							viewDialog.dismiss();
+							startActivity(myIntent);
+							// Will put code for specific font?
+						}
 					}
 				});
-				final Button cancelButton = (Button)dialogView.findViewById(R.id.cancel_button);
+				final Button cancelButton = (Button) dialogView
+						.findViewById(R.id.cancel_button);
 				cancelButton.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
-						viewDialog.cancel();
+						viewDialog.dismiss();
 					}
 				});
-				
+
 				viewDialog.show();
 			}
 		});
-		final Button helpButton = (Button)findViewById(R.id.help_button);
+		final Button helpButton = (Button) findViewById(R.id.help_button);
 		helpButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Intent myIntent = new Intent(v.getContext(), HelpActivity.class);
-                startActivity(myIntent);
+				startActivity(myIntent);
 			}
 		});
 	}

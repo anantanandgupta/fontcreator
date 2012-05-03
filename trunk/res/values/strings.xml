@@ -15,6 +15,7 @@
     <string name="cancel">Cancel</string>
     <string name="export_font">Export Font</string>
     <string name="use_font">Use Font</string>
+    <string name="delete_font">Delete Font</string>
     <string name="display_font">Display Font</string>
     <string name="edit_font">Edit Font</string>
     <string name="serif">Serif</string>

@@ -1,12 +1,13 @@
 package com.google.code.fontcreator;
 
+import java.io.IOException;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
-import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,7 +20,6 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 public class DrawActivity extends Activity implements OnClickListener {
 
@@ -40,6 +40,10 @@ public class DrawActivity extends Activity implements OnClickListener {
 	private String fontName;
 	public enum DrawingTools {
 		straightLine, freeDraw, curvedLine
+	}
+	
+	private enum Direction {
+		forwards, stay, backwards
 	}
 
 	private DrawingTools currentTool;
@@ -73,12 +77,18 @@ public class DrawActivity extends Activity implements OnClickListener {
 		drawPanel.setCurrentTool(DrawingTools.straightLine);
 		//fontManager = new FontManager();
 		ai = new AlphabetIterator();
-		
-		if (getIntent().getExtras().containsKey(MainMenuActivity.FILENAMEKEY))
-			fontName = getIntent().getExtras().getString(MainMenuActivity.FILENAMEKEY);
+		Bundle extras = getIntent().getExtras();
+		if (extras != null && extras.containsKey(FontDefaults.FILENAMEKEY))
+			fontName = extras.getString(FontDefaults.FILENAMEKEY);
 		else 
-			fontName = "NewFont.ttf";
-		fontManager = new FontManager(this);
+			fontName = FontDefaults.DEFAULTFILENAME;
+		if (extras != null && extras.containsKey(FontDefaults.EDITFILENAMEKEY)) {
+			fontName = fontName = extras.getString(FontDefaults.EDITFILENAMEKEY);
+			fontManager =new FontManager(this , fontName);
+		}
+		else {
+			fontManager = new FontManager(this);
+		}
 		updateToolHighlight();
 		ViewTreeObserver vto = drawPanel.getViewTreeObserver();
 		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
@@ -102,10 +112,12 @@ public class DrawActivity extends Activity implements OnClickListener {
 		switch (item.getItemId()) {
 		case R.id.usefontdrawscreenmenuitem:
 			intent = new Intent(this, UseActivity.class);
+			intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
 			startActivity(intent);
 			return true;
 		case R.id.displayfontdrawscreenmenuitem:
 			intent = new Intent(this, DisplayActivity.class);
+			intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
 			startActivity(intent);
 			return true;
 		case R.id.mainmenudrawscreenmenuitem:
@@ -161,11 +173,12 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 				@Override
 				public void onClick(View view) {
-					String abc = letterselect.getText().toString();
-					updateGlyph(abc);
+					String abc = letterselect.getText().toString().trim();
+					drawPanel.clear();
+					drawPanel.loadGlyph(abc, fontManager);
 					currentLetterDisplayButton.setText(abc);
 					ai.setCurrent(abc);
-					viewDialog.cancel();
+					viewDialog.dismiss();
 				}
 			});
 			Button cancelButton = (Button)dialogView.findViewById(R.id.cancel_select_letter_button);
@@ -173,30 +186,33 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 				@Override
 				public void onClick(View view) {
-					viewDialog.cancel();
+					viewDialog.dismiss();
 				}
 			});
 			viewDialog.show();
 			break;
 		case R.id.prevButton:
-			ai.prev();
-			if(drawPanel.needSave())
-				saveGlyphDialog(-1);
+			
+			if(drawPanel.needSave()){
+				saveGlyphDialog(Direction.backwards);
+			}
 			else {
 				drawPanel.clear();
+				ai.prev();
 				drawPanel.loadGlyph(ai.getCurrent(), fontManager);
 				currentLetterDisplayButton.setText(ai.getCurrent());
 			}
 			break;
 		case R.id.saveButton:
-			saveGlyphDialog(0);
+			saveGlyphDialog(Direction.stay);
 			break;
 		case R.id.nextButton:
-			ai.next();
+			
 			if(drawPanel.needSave())
-				saveGlyphDialog(1);
+				saveGlyphDialog(Direction.forwards);
 			else {
 				drawPanel.clear();
+				ai.next();
 				drawPanel.loadGlyph(ai.getCurrent(), fontManager);
 				currentLetterDisplayButton.setText(ai.getCurrent());
 			}
@@ -204,11 +220,11 @@ public class DrawActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	@Override
+/*	@Override
 	protected void onPostResume() {
 		super.onResume();
 		drawPanel.loadGlyph(ai.getCurrent(), fontManager);
-	}
+	}*/
 
 	private void updateToolHighlight() {
 		straightLineToolButton.setBackgroundResource(R.color.transparent);
@@ -230,66 +246,48 @@ public class DrawActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	private void saveGlyphDialog(final int saveCase){
-		final AlertDialog viewDialog;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
-		View dialogView = li.inflate(R.layout.save_dialog, null); 
-
-		builder.setView(dialogView);
-		viewDialog = builder.create();
-
-		Button noButton = (Button)dialogView.findViewById(R.id.dont_save_glyph_button);
-		noButton.setOnClickListener(new OnClickListener() {
-
+	private void saveGlyphDialog(final Direction direction){
+		AlertDialog.Builder ad = new AlertDialog.Builder(this);
+		ad.setMessage(getString(R.string.do_you_want_to_save_text));
+		ad.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			
 			@Override
-			public void onClick(View v) {
-				drawPanel.clear();
-				viewDialog.cancel();				
+			public void onClick(DialogInterface dialog, int which) {
+				ProgressDialog pd = new ProgressDialog(DrawActivity.this);
+				try {
+					
+					drawPanel.save(ai.getCurrent(), fontManager, fontName);
+					fontManager = new FontManager(DrawActivity.this, fontName);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				pd.dismiss();
+				
 			}
 		});
-
-		Button saveButton = (Button)dialogView.findViewById(R.id.save_glyph_button);
-		saveButton.setOnClickListener(new OnClickListener() {
-
+		ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			
 			@Override
-			public void onClick(View view) {
-				fontManager = drawPanel.save(ai.getCurrent(), fontManager, fontName);
-				drawPanel.clear();
-				Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
-				toast.show();
-				viewDialog.cancel();
-			}
-		});
-		Button cancelButton = (Button)dialogView.findViewById(R.id.cancel_save_glyph_button);
-		cancelButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				if(saveCase==-1){
+			public void onClick(DialogInterface dialog, int which) {
+				if (direction == Direction.forwards) {
 					drawPanel.clear();
 					ai.next();
+					drawPanel.loadGlyph(ai.getCurrent(), fontManager);
 				}
-				else if(saveCase==1) {
+				else if (direction == Direction.backwards){
 					drawPanel.clear();
 					ai.prev();
+					drawPanel.loadGlyph(ai.getCurrent(), fontManager);
 				}
-				viewDialog.cancel();
+				else if (direction == Direction.stay) {
+					;
+				}
+				
 			}
 		});
-		viewDialog.setOnCancelListener(new OnCancelListener() {
-
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				currentLetterDisplayButton.setText(ai.getCurrent());
-			}
-		});
-		viewDialog.show();
-	}
-
-	private void updateGlyph(String glyphCharacter) {
-		//Glyph g = fontManager.getGlyph(glyphCharacter);
-		//TODO: Set drawing table to glyph
+		ad.create();
+		ad.show();
+		
 	}
 }
