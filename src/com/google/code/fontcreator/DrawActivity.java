@@ -236,7 +236,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View view) {
-				drawPanel.save(ai.getCurrent(), fontManager);
+				fontManager = drawPanel.save(ai.getCurrent(), fontManager);
 				drawPanel.clear();
 				Toast toast = Toast.makeText(getApplicationContext(), "Letter saved!", Toast.LENGTH_LONG);
 				toast.show();
@@ -248,10 +248,14 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View view) {
-				if(saveCase==-1)
+				if(saveCase==-1){
+					drawPanel.clear();
 					ai.next();
-				else if(saveCase==1)
+				}
+				else if(saveCase==1) {
+					drawPanel.clear();
 					ai.prev();
+				}
 				viewDialog.cancel();
 			}
 		});
