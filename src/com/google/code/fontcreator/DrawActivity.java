@@ -24,26 +24,26 @@ import android.widget.ImageButton;
 public class DrawActivity extends Activity implements OnClickListener {
 
 	private ImageButton straightLineToolButton, freeDrawToolButton,
-	curvedLineToolButton, clearToolButton, 
-	undoButton, redoButton;
+			curvedLineToolButton, clearToolButton, undoButton, redoButton;
 	private Button currentLetterDisplayButton, prevButton, saveButton,
-	nextButton;
+			nextButton;
 
 	private FontManager fontManager;
 
 	private DrawPanel drawPanel;
 
-	//private FontManager fontManager;
+	// private FontManager fontManager;
 
 	private AlphabetIterator ai;
 
 	private String fontName;
+
 	public enum DrawingTools {
 		straightLine, freeDraw, curvedLine
 	}
-	
+
 	private enum Direction {
-		forwards, stay, backwards
+		forwards, stay, backwards, callerHandled
 	}
 
 	private DrawingTools currentTool;
@@ -75,18 +75,18 @@ public class DrawActivity extends Activity implements OnClickListener {
 		nextButton.setOnClickListener(this);
 		currentTool = DrawingTools.straightLine;
 		drawPanel.setCurrentTool(DrawingTools.straightLine);
-		//fontManager = new FontManager();
+		// fontManager = new FontManager();
 		ai = new AlphabetIterator();
 		Bundle extras = getIntent().getExtras();
 		if (extras != null && extras.containsKey(FontDefaults.FILENAMEKEY))
 			fontName = extras.getString(FontDefaults.FILENAMEKEY);
-		else 
+		else
 			fontName = FontDefaults.DEFAULTFILENAME;
 		if (extras != null && extras.containsKey(FontDefaults.EDITFILENAMEKEY)) {
-			fontName = fontName = extras.getString(FontDefaults.EDITFILENAMEKEY);
-			fontManager =new FontManager(this , fontName);
-		}
-		else {
+			fontName = fontName = extras
+					.getString(FontDefaults.EDITFILENAMEKEY);
+			fontManager = new FontManager(this, fontName);
+		} else {
 			fontManager = new FontManager(this);
 		}
 		updateToolHighlight();
@@ -159,16 +159,19 @@ public class DrawActivity extends Activity implements OnClickListener {
 			break;
 		case R.id.currentLetterDisplayButton:
 			final AlertDialog viewDialog;
-			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+			AlertDialog.Builder builder = new AlertDialog.Builder(
+					v.getContext());
 
-			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
-			View dialogView = li.inflate(R.layout.letter_selector_popup, null); 
+			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View dialogView = li.inflate(R.layout.letter_selector_popup, null);
 
 			builder.setView(dialogView);
 			viewDialog = builder.create();
 
-			final EditText letterselect = (EditText)dialogView.findViewById(R.id.select_letter_edit);
-			Button selectButton = (Button)dialogView.findViewById(R.id.select_letter_button);
+			final EditText letterselect = (EditText) dialogView
+					.findViewById(R.id.select_letter_edit);
+			Button selectButton = (Button) dialogView
+					.findViewById(R.id.select_letter_button);
 			selectButton.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -181,7 +184,8 @@ public class DrawActivity extends Activity implements OnClickListener {
 					viewDialog.dismiss();
 				}
 			});
-			Button cancelButton = (Button)dialogView.findViewById(R.id.cancel_select_letter_button);
+			Button cancelButton = (Button) dialogView
+					.findViewById(R.id.cancel_select_letter_button);
 			cancelButton.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -192,11 +196,10 @@ public class DrawActivity extends Activity implements OnClickListener {
 			viewDialog.show();
 			break;
 		case R.id.prevButton:
-			
-			if(drawPanel.needSave()){
+
+			if (drawPanel.needSave()) {
 				saveGlyphDialog(Direction.backwards);
-			}
-			else {
+			} else {
 				drawPanel.clear();
 				ai.prev();
 				drawPanel.loadGlyph(ai.getCurrent(), fontManager);
@@ -207,8 +210,8 @@ public class DrawActivity extends Activity implements OnClickListener {
 			saveGlyphDialog(Direction.stay);
 			break;
 		case R.id.nextButton:
-			
-			if(drawPanel.needSave())
+
+			if (drawPanel.needSave())
 				saveGlyphDialog(Direction.forwards);
 			else {
 				drawPanel.clear();
@@ -220,11 +223,10 @@ public class DrawActivity extends Activity implements OnClickListener {
 		}
 	}
 
-/*	@Override
-	protected void onPostResume() {
-		super.onResume();
-		drawPanel.loadGlyph(ai.getCurrent(), fontManager);
-	}*/
+	/*
+	 * @Override protected void onPostResume() { super.onResume();
+	 * drawPanel.loadGlyph(ai.getCurrent(), fontManager); }
+	 */
 
 	private void updateToolHighlight() {
 		straightLineToolButton.setBackgroundResource(R.color.transparent);
@@ -233,29 +235,29 @@ public class DrawActivity extends Activity implements OnClickListener {
 		switch (currentTool) {
 		case straightLine:
 			straightLineToolButton
-			.setBackgroundResource(R.color.transparentbuttonselected);
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		case freeDraw:
 			freeDrawToolButton
-			.setBackgroundResource(R.color.transparentbuttonselected);
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		case curvedLine:
 			curvedLineToolButton
-			.setBackgroundResource(R.color.transparentbuttonselected);
+					.setBackgroundResource(R.color.transparentbuttonselected);
 			break;
 		}
 	}
 
-	private void saveGlyphDialog(final Direction direction){
+	private void saveGlyphDialog(final Direction direction) {
 		AlertDialog.Builder ad = new AlertDialog.Builder(this);
 		ad.setMessage(getString(R.string.do_you_want_to_save_text));
 		ad.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				ProgressDialog pd = new ProgressDialog(DrawActivity.this);
+				dialog.dismiss();
+				ProgressDialog pd = ProgressDialog.show(DrawActivity.this,"Saving font","This can take several seconds",true,false,null);
 				try {
-					
 					drawPanel.save(ai.getCurrent(), fontManager, fontName);
 					fontManager = new FontManager(DrawActivity.this, fontName);
 				} catch (IOException e) {
@@ -263,31 +265,31 @@ public class DrawActivity extends Activity implements OnClickListener {
 					e.printStackTrace();
 				}
 				pd.dismiss();
-				
+
 			}
 		});
 		ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
-			
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if (direction == Direction.forwards) {
 					drawPanel.clear();
 					ai.next();
 					drawPanel.loadGlyph(ai.getCurrent(), fontManager);
-				}
-				else if (direction == Direction.backwards){
+				} else if (direction == Direction.backwards) {
 					drawPanel.clear();
 					ai.prev();
 					drawPanel.loadGlyph(ai.getCurrent(), fontManager);
-				}
-				else if (direction == Direction.stay) {
+				} else if (direction == Direction.callerHandled) {
+					;
+				} else if (direction == Direction.stay) {
 					;
 				}
-				
+
 			}
 		});
 		ad.create();
 		ad.show();
-		
+
 	}
 }
