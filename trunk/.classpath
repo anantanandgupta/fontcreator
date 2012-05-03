@@ -9,5 +9,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/FontCreator/sfntly-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/icu4j-charset-4_8_1_1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
