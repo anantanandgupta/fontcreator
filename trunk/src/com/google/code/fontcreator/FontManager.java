@@ -200,7 +200,6 @@ public class FontManager {
 		float scaleFactor = 1500.0f / (screenWidth - baselineWidth);
 
 		// write the number of contours as int16
-		String tag = "Font";
 		byte[] b = intToInt16(numContours);
 		data.writeBytes(0, b);
 		offset = offset + b.length;
@@ -256,11 +255,11 @@ public class FontManager {
 		 * instructions.readBytes(0, b, 0, instructions.length());
 		 * data.writeBytes(offset, b); offset = offset + b.length;
 		 */
-		b = intToInt16(0);
+		b = intToInt16(0); //We don't do hinting
 		data.writeBytes(offset, b);
 		offset = offset + b.length;
 
-		byte onCurve = (byte) 1, offCurve = (byte) 0;
+		byte onCurve = (byte) 1, offCurve = (byte) 0; //Write whether each point is on the curve or not. Our format just alternates
 		boolean isOnCurve = true;
 		for (Stroke s : contourList) {
 			for (Point p : s.getSegments()) {
@@ -276,7 +275,7 @@ public class FontManager {
 		}
 
 		int last = 0;
-		for (Stroke s : contourList) {
+		for (Stroke s : contourList) { //Write X's
 			for (Point p : s.getSegments()) {
 				b = intToInt16((int) (scaleFactor * (p.x - baselineWidth))
 						- last);
@@ -287,7 +286,7 @@ public class FontManager {
 		}
 		last = 0;
 
-		for (Stroke s : contourList) {
+		for (Stroke s : contourList) { //Write Y's
 			for (Point p : s.getSegments()) {
 				b = intToInt16((int) (scaleFactor * (baselineHeight - p.y))
 						- last);
@@ -297,10 +296,11 @@ public class FontManager {
 			}
 		}
 
-		if (offset % 4 != 0) {
+		if (offset % 4 != 0) { //Pad out to 4 bytes
 			data.writePadding(offset, 4 - offset % 4);
 			offset += 4 - offset % 4;
 		}
+		
 		return new MySimpleGlyph(data);
 	}
 
