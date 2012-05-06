@@ -1,7 +1,5 @@
 package com.google.code.fontcreator;
 
-import com.google.typography.font.sfntly.table.Table;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

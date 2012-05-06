@@ -83,7 +83,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 		else
 			fontName = FontDefaults.DEFAULTFILENAME;
 		if (extras != null && extras.containsKey(FontDefaults.EDITFILENAMEKEY)) {
-			fontName = fontName = extras
+			fontName = extras
 					.getString(FontDefaults.EDITFILENAMEKEY);
 			fontManager = new FontManager(this, fontName);
 		} else {

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.util.Log;
 
 public class Stroke {
 
