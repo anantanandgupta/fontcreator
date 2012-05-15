@@ -8,7 +8,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -256,15 +258,23 @@ public class DrawActivity extends Activity implements OnClickListener {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
-				ProgressDialog pd = ProgressDialog.show(DrawActivity.this,"Saving font","This can take several seconds",true,false,null);
-				try {
-					drawPanel.save(ai.getCurrent(), fontManager, fontName);
-					fontManager = new FontManager(DrawActivity.this, fontName);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				pd.dismiss();
+				final ProgressDialog pd = ProgressDialog.show(DrawActivity.this,"Saving Font","This can take several seconds",true,false,null);
+				new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
+						try {
+							drawPanel.save(ai.getCurrent(), fontManager, fontName);
+							fontManager = new FontManager(DrawActivity.this, fontName);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return null;
+					}
+					@Override
+					protected void onPostExecute(Void result) {
+						pd.dismiss();
+					}
+				}.execute();
 
 			}
 		});
