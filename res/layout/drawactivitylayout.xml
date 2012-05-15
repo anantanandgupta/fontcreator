@@ -64,7 +64,8 @@
             android:background="@drawable/bluesquarebutton"
             android:gravity="center"
             android:text="@string/A"
-            android:textSize="23sp" />
+            android:textSize="23sp" 
+            android:textColor="@color/white1"/>
 
         <ImageButton
             android:id="@+id/redoButton"
@@ -93,7 +94,8 @@
             android:layout_weight="3"
             android:background="@drawable/bluesquarebutton"
             android:text="@string/prev"
-            android:textSize="27sp" />
+            android:textSize="27sp" 
+            android:textColor="@color/white1"/>
 
         <Button
             android:id="@+id/saveButton"
@@ -102,7 +104,8 @@
             android:layout_weight="3"
             android:background="@drawable/bluesquarebutton"
             android:text="@string/save"
-            android:textSize="27sp" />
+            android:textSize="27sp" 
+            android:textColor="@color/white1"/>
 
         <Button
             android:id="@+id/nextButton"
@@ -111,7 +114,8 @@
             android:layout_weight="3"
             android:background="@drawable/bluesquarebutton"
             android:text="@string/next"
-            android:textSize="27sp" />
+            android:textSize="27sp" 
+            android:textColor="@color/white1"/>
     </LinearLayout>
 
 </LinearLayout>
