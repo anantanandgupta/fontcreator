@@ -1,6 +1,7 @@
 package com.google.code.fontcreator;
 
 import java.io.IOException;
+import java.sql.Savepoint;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -113,16 +114,19 @@ public class DrawActivity extends Activity implements OnClickListener {
 		Intent intent;
 		switch (item.getItemId()) {
 		case R.id.usefontdrawscreenmenuitem:
+			saveWithProgressIndicator();
 			intent = new Intent(this, UseActivity.class);
 			intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
 			startActivity(intent);
 			return true;
 		case R.id.displayfontdrawscreenmenuitem:
+			saveWithProgressIndicator();
 			intent = new Intent(this, DisplayActivity.class);
 			intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
 			startActivity(intent);
 			return true;
 		case R.id.mainmenudrawscreenmenuitem:
+			saveWithProgressIndicator();
 			intent = new Intent(this, MainMenuActivity.class);
 			startActivity(intent);
 			return true;
@@ -258,24 +262,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
-				final ProgressDialog pd = ProgressDialog.show(DrawActivity.this,"Saving Font","This can take several seconds",true,false,null);
-				new AsyncTask<Void, Void, Void>() {
-					@Override
-					protected Void doInBackground(Void... params) {
-						try {
-							drawPanel.save(ai.getCurrent(), fontManager, fontName);
-							fontManager = new FontManager(DrawActivity.this, fontName);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						return null;
-					}
-					@Override
-					protected void onPostExecute(Void result) {
-						pd.dismiss();
-					}
-				}.execute();
-
+				saveWithProgressIndicator();
 			}
 		});
 		ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -301,5 +288,25 @@ public class DrawActivity extends Activity implements OnClickListener {
 		ad.create();
 		ad.show();
 
+	}
+	
+	private void saveWithProgressIndicator() {
+		final ProgressDialog pd = ProgressDialog.show(DrawActivity.this,"Saving Font","This can take several seconds",true,false,null);
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					drawPanel.save(ai.getCurrent(), fontManager, fontName);
+					fontManager = new FontManager(DrawActivity.this, fontName);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+			@Override
+			protected void onPostExecute(Void result) {
+				pd.dismiss();
+			}
+		}.execute();
 	}
 }
