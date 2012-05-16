@@ -111,24 +111,41 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent;
 		switch (item.getItemId()) {
 		case R.id.usefontdrawscreenmenuitem:
-			saveWithProgressIndicator();
-			intent = new Intent(this, UseActivity.class);
-			intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
-			startActivity(intent);
+			saveWithProgressIndicator(new ProgressIndicatorCallback() {
+
+				@Override
+				public void onComplete() {
+					Intent intent;
+					intent = new Intent(DrawActivity.this, UseActivity.class);
+					intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
+					startActivity(intent);
+				}
+			});
 			return true;
 		case R.id.displayfontdrawscreenmenuitem:
-			saveWithProgressIndicator();
-			intent = new Intent(this, DisplayActivity.class);
-			intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
-			startActivity(intent);
+			saveWithProgressIndicator(new ProgressIndicatorCallback() {
+
+				@Override
+				public void onComplete() {
+					Intent intent;
+					intent = new Intent(DrawActivity.this, DisplayActivity.class);
+					intent.putExtra(FontDefaults.FILENAMEKEY, fontName);
+					startActivity(intent);
+				}
+			});
 			return true;
 		case R.id.mainmenudrawscreenmenuitem:
-			saveWithProgressIndicator();
-			intent = new Intent(this, MainMenuActivity.class);
-			startActivity(intent);
+			saveWithProgressIndicator(new ProgressIndicatorCallback() {
+
+				@Override
+				public void onComplete() {
+					Intent intent;
+					intent = new Intent(DrawActivity.this, MainMenuActivity.class);
+					startActivity(intent);
+				}
+			});
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -262,7 +279,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
-				saveWithProgressIndicator();
+				saveWithProgressIndicator(null);
 			}
 		});
 		ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -290,7 +307,7 @@ public class DrawActivity extends Activity implements OnClickListener {
 
 	}
 	
-	private void saveWithProgressIndicator() {
+	private void saveWithProgressIndicator(final ProgressIndicatorCallback callback) {
 		final ProgressDialog pd = ProgressDialog.show(DrawActivity.this,"Saving Font","This can take several seconds",true,false,null);
 		new AsyncTask<Void, Void, Void>() {
 			@Override
@@ -306,7 +323,13 @@ public class DrawActivity extends Activity implements OnClickListener {
 			@Override
 			protected void onPostExecute(Void result) {
 				pd.dismiss();
+				if (callback != null) 
+					callback.onComplete();
 			}
 		}.execute();
+	}
+	
+	private interface ProgressIndicatorCallback {
+		void onComplete();
 	}
 }
