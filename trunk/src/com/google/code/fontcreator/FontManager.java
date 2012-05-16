@@ -190,14 +190,14 @@ public class FontManager {
 	}
 
 	public Glyph makeGlyph(Glyph originalGlyph, List<Stroke> contourList,
-			int baselineHeight, int baselineWidth, int screenWidth) {
+			int baselineHeight, int baselineWidth, int screenWidth, float scaleFactor) {
 		WritableFontData data = WritableFontData.createWritableFontData(0);
 		int numContours = contourList.size();
 		int offset = 0;
 
 		// HorizontalHeaderTable hheaTable = mFont.getTable(Tag.hhea);
 
-		float scaleFactor = 1500.0f / (screenWidth - baselineWidth);
+		//float scaleFactor = 1500.0f / (screenWidth - baselineWidth);
 
 		// write the number of contours as int16
 		byte[] b = intToInt16(numContours);

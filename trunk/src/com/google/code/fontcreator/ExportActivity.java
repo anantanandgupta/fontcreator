@@ -51,7 +51,7 @@ public class ExportActivity extends Activity {
 				attachment = exportSpinner.getSelectedItem().toString();
 
 				String attachmentPath = "";
-				attachmentPath = (FontUtils.getFont(attachment,
+				attachmentPath = "file://"+(FontUtils.getFont(attachment,
 						view.getContext())).getAbsolutePath();
 
 				email(view.getContext(), emailTo, emailCC, subject, emailText,

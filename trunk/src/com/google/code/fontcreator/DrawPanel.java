@@ -19,6 +19,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -40,6 +41,8 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	private Paint blackPaint = null, drawPathPaint = null, continuousPaint = null, contourPaint = null;
 	private int lastDownX, lastDownY;
 	private DrawActivity.DrawingTools currentTool;
+	
+	private float scaleFactor;
 
 	public DrawPanel(Context context, AttributeSet attribs) {
 		super(context, attribs);
@@ -325,9 +328,10 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 		int height = getHeight();
 		int baselineHeight = (int)(height * 3f/4f);
 		int baselineWidth = (int)(width * 1f/5f);
-		float scaleFactor = (width - baselineWidth)/1500.0f;
-	    
-	    Point control = new Point(), current = new Point();
+		float xScale = (width - baselineWidth)/((float)glyph.xMax() +100);
+		float yScale = (height -(height - baselineHeight))/((float)glyph.yMax()+100);
+		scaleFactor = xScale < yScale ? xScale : yScale;
+	    Point inferredOnCurve = null, control = new Point(), current = new Point(), start = new Point();
 	    for (int i = 0; i < glyph.numberOfContours(); i++) {
 	    	for (int j = 0; j < glyph.numberOfPoints(i); j++) {
 	    		int xScaled = (int)(scaleFactor * glyph.xCoordinate(i, j)) + baselineWidth;
@@ -335,6 +339,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	    		current.set(xScaled, yScaled);
 	    		if (glyph.onCurve(i, j)) {
 	    			if (j == 0) {
+	    				start.set(current.x, current.y);
 	    				currContour.start(current);
 	    				control = null;
 	    			}
@@ -351,8 +356,14 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	    				control = new Point(xScaled, yScaled);
 	    			} 
 	    			else {
-	    				currContour.addQuad(control, current);
+	    				inferredOnCurve = new Point((control.x + current.x) /2,(control.y + current.y)/2);
+	    				currContour.addQuad(control, inferredOnCurve);
 	    				control.set(xScaled, yScaled);
+	    			}
+	    		}
+	    		if (j == glyph.numberOfPoints(i)-1) {
+	    			if (control != null) {
+	    				currContour.addQuad(control, start);
 	    			}
 	    		}
 	    	}
@@ -541,7 +552,7 @@ public class DrawPanel extends SurfaceView implements SurfaceHolder.Callback {
 	
 	public FontManager save(String letter, FontManager fm, String fontName) throws IOException {
 		
-		Glyph f = fm .makeGlyph(fm.getGlyph(letter), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f), getWidth());
+		Glyph f = fm .makeGlyph(fm.getGlyph(letter), contourList, (int)(getHeight() * 3f/4f),(int)( getWidth() * 1f/5f), getWidth(), 1/scaleFactor);
 		needSave = false;
 		return fm.changeGlyph(letter, f, fontName);
 		
