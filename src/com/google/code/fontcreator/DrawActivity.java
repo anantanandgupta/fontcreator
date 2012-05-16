@@ -1,5 +1,6 @@
 package com.google.code.fontcreator;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Savepoint;
 
@@ -312,11 +313,14 @@ public class DrawActivity extends Activity implements OnClickListener {
 		new AsyncTask<Void, Void, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {
-				try {
-					drawPanel.save(ai.getCurrent(), fontManager, fontName);
-					fontManager = new FontManager(DrawActivity.this, fontName);
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (drawPanel.needSave() || !((new File(getFilesDir(), fontName)).exists())) {
+					try {
+						drawPanel.save(ai.getCurrent(), fontManager, fontName);
+						fontManager = new FontManager(DrawActivity.this,
+								fontName);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 				return null;
 			}
