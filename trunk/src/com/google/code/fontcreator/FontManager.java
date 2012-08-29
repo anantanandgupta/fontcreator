@@ -78,7 +78,7 @@ public class FontManager {
 	private void initDefaultFont() {
 		try {
 			mFont = mFontFactory.loadFonts(context.getAssets().open(
-					"fonts/arial.ttf"))[0];
+					"fonts/HeadlandOne-Regular.ttf"))[0];
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -127,7 +127,7 @@ public class FontManager {
 		Log.v("font name", nameOfFont);
 		if (isDefault)
 			mFontBuilder = mFontFactory.loadFontsForBuilding(context
-					.getAssets().open("fonts/arial.ttf"))[0];
+					.getAssets().open("fonts/HeadlandOne-Regular.ttf"))[0];
 		else
 			mFontBuilder = mFontFactory.loadFontsForBuilding(context
 					.openFileInput(filename))[0];
