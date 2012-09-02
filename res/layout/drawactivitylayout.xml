@@ -65,7 +65,8 @@
             android:gravity="center"
             android:textColor="@color/white1"
             android:text="@string/A"
-            android:textSize="23sp" />
+            android:textSize="23sp" 
+            android:padding="1dp"/>
 
         <ImageButton
             android:id="@+id/redoButton"
